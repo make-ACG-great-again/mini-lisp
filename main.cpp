@@ -41,12 +41,12 @@ int main() {
                 std::exit(0);
             }
             auto tokens = Tokenizer::tokenize(line);
-            for (auto& token : tokens) { //词法分析器
-                std::cout << *token << std::endl; //词法分析器
-            } //词法分析器
+            //for (auto& token : tokens) { //词法分析器
+            //    std::cout << *token << std::endl; //词法分析器
+            //} //词法分析器
             Parser parser(std::move(tokens));  // tokenptr 不支持复制
             auto value = parser.parse();
-            std::cout << value->toString() << std::endl;  // 输出外部表示   //语法分析器
+            //std::cout << value->toString() << std::endl;  // 输出外部表示   //语法分析器
             EvalEnv env; //求值
             auto result = env.eval(std::move(value)); //求值
             //if (result == nullptr) std::cout << "error" << std::endl;

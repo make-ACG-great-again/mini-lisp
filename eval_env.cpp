@@ -23,15 +23,20 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         if (v[0]->asSymbol() == "define"s) {
             if (auto name = v[1]->asSymbol()) {
                 auto tem = v[2];
-                while (auto te = myMap[tem->asSymbol()]) {
+                /*while (auto te = myMap[tem->asSymbol()]) {
                     tem = te;
-                }
+                }*/
+                if (auto temp = myMap[tem->asSymbol()]) tem = temp;
                 myMap[name] = tem;
-                //std::cout << v[1]->toString() << tem->toString() << std::endl;
-                //if (name == std::nullopt) std::cout << "null";
-                //std::cout <<"new symbol recorded" << std::endl;
+                // std::cout << v[1]->toString() << tem->toString() <<
+                // std::endl; if (name == std::nullopt) std::cout << "null";
+                // std::cout <<"new symbol recorded" << std::endl;
                 return ValuePtr(new NilValue());
-            } else if (auto name = expr->asSymbol()) {
+            } else {
+                throw LispError("illegal define.");
+                return ValuePtr(new NilValue());
+            }
+        } else if (auto name = v[0]->asSymbol()) {
                 if (auto value = myMap[name]) {
                     /*std::cout << "get symbol's value from recording"
                               << std::endl;
@@ -41,11 +46,9 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
                     throw LispError("Variable " + *name + " not defined.");
                     return ValuePtr(new NilValue());
                 }
-            }
-            else {
+        }else {
                 throw LispError("Malformed define.");
                 return ValuePtr(new NilValue());
-            }
         }
         v.clear();
     } else if (typeid(*expr) == typeid(SymbolValue)) {
