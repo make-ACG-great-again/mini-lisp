@@ -1,3 +1,4 @@
+#include<iostream>
 #include "./builtins.h"
 #include "./value.h"
 #include "./error.h"
@@ -11,6 +12,13 @@ ValuePtr my_add(const std::vector<ValuePtr>& params) {
         result += i->asNumber();
     }
     return std::make_shared<NumericValue>(result);
+};
+
+ValuePtr my_print(const std::vector<ValuePtr>& params){
+    for (auto i : params) {
+        std::cout << i->toString() << std::endl;
+    }
+    return std::make_shared<NilValue>();
 };
 
 std::unordered_map<std::string, BuiltinFuncType*> builtin::load_list;
