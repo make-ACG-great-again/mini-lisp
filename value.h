@@ -90,6 +90,10 @@ public:
     static std::vector<std::shared_ptr<Value>> v;
     std::vector<std::shared_ptr<Value>> toVector();
     std::optional<std::string> asSymbol();
+    ValuePtr right()const{
+        ValuePtr temp = this->t2;
+        return temp;
+    };
 };
 
 //typedef ValuePtr (*FuncPtr)(const std::vector<ValuePtr>&);

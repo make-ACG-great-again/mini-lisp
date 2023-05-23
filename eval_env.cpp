@@ -1,6 +1,8 @@
 #include<typeinfo>
 #include<iostream>
 #include<unordered_map>
+#include <algorithm>
+#include <iterator>
 #include "./error.h"
 #include "./eval_env.h"
 #include "./value.h"
@@ -22,7 +24,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         std::vector<ValuePtr> v = expr->toVector();
         if (v[0]->asSymbol() == "define"s) {
             if (auto name = v[1]->asSymbol()) {
-                auto tem = v[2];
+                auto tem = this->eval(v[2]);
                 /*while (auto te = myMap[tem->asSymbol()]) {
                     tem = te;
                 }*/
@@ -31,26 +33,32 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
                 // std::cout << v[1]->toString() << tem->toString() <<
                 // std::endl; if (name == std::nullopt) std::cout << "null";
                 // std::cout <<"new symbol recorded" << std::endl;
+                v.clear();
                 return ValuePtr(new NilValue());
             } else {
                 throw LispError("illegal define.");
                 return ValuePtr(new NilValue());
             }
-        } else if (auto name = v[0]->asSymbol()) {
-                if (auto value = myMap[name]) {
-                    /*std::cout << "get symbol's value from recording"
-                              << std::endl;
-                    if (value == nullptr) std::cout << "error in search" << std::endl;*/
-                    return value;
-                } else {
-                    throw LispError("Variable " + *name + " not defined.");
-                    return ValuePtr(new NilValue());
-                }
-        }else {
+        } else{ // if (auto name = v[0]->asSymbol()) {
+                //if (auto value = myMap[name]) {
+                //    /*std::cout << "get symbol's value from recording"
+                //              << std::endl;
+                //    if (value == nullptr) std::cout << "error in search" << std::endl;*/
+                //    return value;
+                //} else {
+                //    throw LispError("Variable " + *name + " not defined.");
+                //    return ValuePtr(new NilValue());
+                //}
+            ValuePtr proc = this->eval(v[0]);
+            const PairValue* tempptr =
+                dynamic_cast<PairValue*>(&(*expr));
+            std::vector<ValuePtr> args = this->evalList(tempptr->right());
+            v.clear();
+            return this->apply(proc, args);
+        }/*else {
                 throw LispError("Malformed define.");
                 return ValuePtr(new NilValue());
-        }
-        v.clear();
+        }*/
     } else if (typeid(*expr) == typeid(SymbolValue)) {
         if (auto value = myMap[expr->asSymbol()]) {
             return value;
@@ -64,5 +72,23 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
     }else {
         throw LispError("Unimplemented");
         return ValuePtr(new NilValue());
+    }
+}
+
+std::vector<ValuePtr> EvalEnv::evalList(ValuePtr expr) {
+    std::vector<ValuePtr> result;
+    std::ranges::transform(expr->toVector(), std::back_inserter(result),
+                           [this](ValuePtr v) { return this->eval(v); });
+    return result;
+}
+
+ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {
+    if (typeid(*proc) == typeid(BuiltinProcValue)) {
+        // 调用内置过程
+        const BuiltinProcValue* tempptr =
+            dynamic_cast<BuiltinProcValue*>(&(*proc));
+        return tempptr->procedure(args);
+    } else {
+        throw LispError("Unimplemented");
     }
 }

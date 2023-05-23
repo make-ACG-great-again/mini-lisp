@@ -123,10 +123,10 @@ std::string PairValue::toString() const {
 
 std::vector<std::shared_ptr<Value>> PairValue::toVector() {
     bool tt = out;
-    if (typeid(*t1) == typeid(PairValue)) {
-        out = 0;
-        t1->toVector();
-    } else if (typeid(*t1) == typeid(NilValue)) {
+    //if (typeid(*t1) == typeid(PairValue)) {
+    //    //v.push_back();
+    //} else 
+    if (typeid(*t1) == typeid(NilValue)) {
         
     } else
         v.push_back(t1);

@@ -21,5 +21,7 @@ public:
         }
     }
     ValuePtr eval(ValuePtr expr);
+    std::vector<ValuePtr> evalList(ValuePtr expr);
+    ValuePtr apply(ValuePtr proc, std::vector<ValuePtr> args);
 };
 #endif
