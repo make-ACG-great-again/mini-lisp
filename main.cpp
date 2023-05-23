@@ -4,7 +4,9 @@
 #include "./tokenizer.h"
 #include "./parser.h"
 #include "./eval_env.h"
-#include "rjsj_test.hpp"
+#include "./rjsj_test.hpp"
+#include "./builtins.h"
+#include "./value.h"
 
 //struct TestCtx {
 //    std::string eval(std::string input) {
@@ -28,7 +30,7 @@ struct TestCtx {
 
 int main() {
     //RJSJ_TEST(TestCtx, Lv2, Lv2Only);
-    RJSJ_TEST(TestCtx, Lv2, Lv3);
+    //RJSJ_TEST(TestCtx, Lv2, Lv3);
     // [...]
     while (true) {
         try {

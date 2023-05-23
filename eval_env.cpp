@@ -29,7 +29,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
                 myMap[name] = tem;
                 //std::cout << v[1]->toString() << tem->toString() << std::endl;
                 //if (name == std::nullopt) std::cout << "null";
-                std::cout <<"new symbol recorded" << std::endl;
+                //std::cout <<"new symbol recorded" << std::endl;
                 return ValuePtr(new NilValue());
             } else if (auto name = expr->asSymbol()) {
                 if (auto value = myMap[name]) {
@@ -56,6 +56,8 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
             throw LispError("Variable " + expr->toString() + " not defined.");
             return ValuePtr(new NilValue());
         }
+    } else if (typeid(*expr) == typeid(BuiltinProcValue)) {
+        return expr;
     }else {
         throw LispError("Unimplemented");
         return ValuePtr(new NilValue());

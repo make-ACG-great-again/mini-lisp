@@ -20,6 +20,12 @@ public:
     virtual std::optional<std::string> asSymbol() {
         return std::string{"error:unoverrided"};
     };
+    virtual bool isNumber() {
+        return false;
+    };
+    virtual double asNumber() {
+        return 0;
+    };
 };
 
 using ValuePtr = std::shared_ptr<Value>;
@@ -39,6 +45,12 @@ public:
 	NumericValue(double n);
 	std::string toString()const;
     std::optional<std::string> asSymbol();
+    bool isNumber() {
+        return true;
+    };
+    double asNumber() {
+        return d;
+    };
 };
 
 class StringValue : public Value {
@@ -78,6 +90,20 @@ public:
     static std::vector<std::shared_ptr<Value>> v;
     std::vector<std::shared_ptr<Value>> toVector();
     std::optional<std::string> asSymbol();
+};
+
+//typedef ValuePtr (*FuncPtr)(const std::vector<ValuePtr>&);
+
+using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&);
+
+class BuiltinProcValue : public Value {
+    // [...]
+
+public:
+    BuiltinFuncType* procedure;
+    BuiltinProcValue(BuiltinFuncType* p) : procedure(p){};
+    // 直接返回 #<procedure> 就可以，我们不做更多要求。
+    std::string toString() const override;
 };
 
 #endif
