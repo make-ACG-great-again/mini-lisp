@@ -8,15 +8,6 @@
 #include "./builtins.h"
 #include "./value.h"
 
-//struct TestCtx {
-//    std::string eval(std::string input) {
-//        auto tokens = Tokenizer::tokenize(input);
-//        Parser parser(std::move(tokens));
-//        auto value = parser.parse();
-//        return value->toString();
-//    }
-//};
-
 struct TestCtx {
     EvalEnv env;
     std::string eval(std::string input) {
@@ -32,6 +23,7 @@ int main() {
     //RJSJ_TEST(TestCtx, Lv2, Lv2Only);
     //RJSJ_TEST(TestCtx, Lv2, Lv3);
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4);
+    //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5);
     // [...]
     while (true) {
         try {

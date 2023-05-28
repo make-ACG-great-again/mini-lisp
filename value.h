@@ -110,5 +110,17 @@ public:
     std::string toString() const override;
 };
 
+class LambdaValue : public Value {
+private:
+    std::vector<std::string> params;
+    std::vector<ValuePtr> body;
+    // [...]
+public:
+    LambdaValue(const std::vector<std::string>& params,const std::vector<ValuePtr>& body)
+        : params{params}, body{body} {};
+    std::string toString() const override;  // 如前所述，返回 #<procedure> 即可
+};
+
+
 #endif
 

@@ -39,7 +39,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
                 v.clear();
                 return this->apply(proc, args);
             }
-        } else{ // if (auto name = v[0]->asSymbol()) {
+        //} else{ // if (auto name = v[0]->asSymbol()) {
                 //if (auto value = myMap[name]) {
                 //    /*std::cout << "get symbol's value from recording"
                 //              << std::endl;
@@ -49,21 +49,21 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
                 //    throw LispError("Variable " + *name + " not defined.");
                 //    return ValuePtr(new NilValue());
                 //}
-            ValuePtr proc = this->eval(v[0]);
+            /*ValuePtr proc = this->eval(v[0]);
             const PairValue* tempptr =
                 dynamic_cast<PairValue*>(&(*expr));
             std::vector<ValuePtr> args = this->evalList(tempptr->right());
             v.clear();
-            return this->apply(proc, args);
-        }/*else {
-                throw LispError("Malformed define.");
+            return this->apply(proc, args);*/
+        }else {
+                throw LispError("undefined operate.");
                 return ValuePtr(new NilValue());
-        }*/
+        }
     } else if (typeid(*expr) == typeid(SymbolValue)) {
         if (auto value = myMap[expr->asSymbol()]) {
             return value;
         } else {
-            std::cout << expr->toString();
+            //std::cout << expr->toString();
             throw LispError("Variable " + expr->toString() + " not defined.");
             return ValuePtr(new NilValue());
         }
