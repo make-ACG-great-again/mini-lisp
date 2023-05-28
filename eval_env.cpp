@@ -8,7 +8,10 @@
 #include "./value.h"
 using namespace std::literals;  // 使用 s 后缀
 
+
 std::unordered_map<std::optional<std::string>, ValuePtr> EvalEnv::myMap;
+using SpecialFormType = ValuePtr(const std::vector<ValuePtr>&, EvalEnv&);
+extern const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
     if (typeid(*expr) == typeid(BooleanValue) ||
@@ -22,22 +25,19 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         return ValuePtr(new NilValue());
     } else if (typeid(*expr) == typeid(PairValue)) {
         std::vector<ValuePtr> v = expr->toVector();
-        if (v[0]->asSymbol() == "define"s) {
-            if (auto name = v[1]->asSymbol()) {
-                auto tem = this->eval(v[2]);
-                /*while (auto te = myMap[tem->asSymbol()]) {
-                    tem = te;
-                }*/
-                if (auto temp = myMap[tem->asSymbol()]) tem = temp;
-                myMap[name] = tem;
-                // std::cout << v[1]->toString() << tem->toString() <<
-                // std::endl; if (name == std::nullopt) std::cout << "null";
-                // std::cout <<"new symbol recorded" << std::endl;
-                v.clear();
-                return ValuePtr(new NilValue());
+        if (auto name = v[0]->asSymbol()){
+            std::string s = {}; 
+            if (SPECIAL_FORMS.count(name.value()) > 0) {
+                s = name.value();
+                std::cout << s << std::endl;
+                SpecialFormType* deal_with = SPECIAL_FORMS.find(s)->second;
+                return deal_with(v, *this);
             } else {
-                throw LispError("illegal define.");
-                return ValuePtr(new NilValue());
+                ValuePtr proc = this->eval(v[0]);
+                const PairValue* tempptr = dynamic_cast<PairValue*>(&(*expr));
+                std::vector<ValuePtr> args = this->evalList(tempptr->right());
+                v.clear();
+                return this->apply(proc, args);
             }
         } else{ // if (auto name = v[0]->asSymbol()) {
                 //if (auto value = myMap[name]) {
