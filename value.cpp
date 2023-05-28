@@ -153,3 +153,8 @@ std::optional<std::string> PairValue::asSymbol() {
 std::string BuiltinProcValue::toString() const {
     return "#<procedure>";
 };
+
+std::string LambdaValue::toString() const {
+    return "#<procedure>";
+};
+
