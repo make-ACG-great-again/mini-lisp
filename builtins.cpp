@@ -119,9 +119,9 @@ ValuePtr my_remainder(const std::vector<ValuePtr>& params) {
     int b = params[1]->asNumber() * 10000;
     int temp = a % b;
     double result = temp / 10000;*/
-    if (params[0]->asNumber() / 1 != 0 || params[1]->asNumber() / 1 != 0)
-        throw LispError("Cannot put a non-integer value.");
-    int result = int(params[0]->asNumber()) % int(params[1]->asNumber());
+    double a = params[0]->asNumber();
+    double b = params[1]->asNumber();
+    double result = std::fmod(a, b);
     return std::make_shared<NumericValue>(result);
 };
 
@@ -133,9 +133,8 @@ ValuePtr my_modulo(const std::vector<ValuePtr>& params) {
     int b = params[1]->asNumber() * 10000;
     int temp = a % b;
     double result = temp / 10000;*/
-    double a = params[0]->asNumber();
-    double b = params[1]->asNumber();
-    double result = std::fmod(a, b);
+    int temp = std::floor(params[0]->asNumber() / params[1]->asNumber());
+    double result = params[0]->asNumber() - params[1]->asNumber() * temp;
     return std::make_shared<NumericValue>(result);
 };
 
