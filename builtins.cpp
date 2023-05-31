@@ -294,5 +294,151 @@ ValuePtr my_atom(const std::vector<ValuePtr>& params){
         return std::make_shared<BooleanValue>(false);
 };
 
+ValuePtr my_boolean(const std::vector<ValuePtr>& params){
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(BooleanValue))
+        return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_integer(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(NumericValue)) {
+        if (params[0]->asNumber() == int(params[0]->asNumber()))
+            return std::make_shared<BooleanValue>(true);
+        else
+            return std::make_shared<BooleanValue>(false);
+    }else return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_list(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(NilValue))
+        return std::make_shared<BooleanValue>(true);
+    else if (typeid(*params[0]) == typeid(PairValue)) {
+        ValuePtr temp = params[0];
+        while (typeid(*temp) == typeid(PairValue)) {
+            PairValue* temporary = dynamic_cast<PairValue*>(&(*temp));
+            temp = temporary->right();
+        };
+        if (typeid(*temp) != typeid(NilValue))
+            return std::make_shared<BooleanValue>(false);
+        else
+            return std::make_shared<BooleanValue>(true);
+    } else return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_number(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(NumericValue))
+        return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_null(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(NilValue))
+        return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_pair(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(PairValue))
+        return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_procedure(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(BuiltinProcValue))
+        return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_string(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(StringValue))
+        return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_symbol(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(SymbolValue))
+        return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
+//对子与列表操作库
+ValuePtr my_car(const std::vector<ValuePtr>& params){
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) != typeid(PairValue))
+        throw LispError("wrong type of arguments.");
+    const PairValue* temp = dynamic_cast<PairValue*>(&(*params[0]));
+    return temp->left();
+};
+
+ValuePtr my_cdr(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) != typeid(PairValue))
+        throw LispError("wrong type of arguments.");
+    const PairValue* temp = dynamic_cast<PairValue*>(&(*params[0]));
+    return temp->right();
+};
+
+ValuePtr my_cons(const std::vector<ValuePtr>& params) {
+    if (params.size() != 2) throw LispError("wrong num of arguments.");
+    return ValuePtr(new PairValue(params[0], params[1]));
+};
+
+ValuePtr my_length(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) throw LispError("wrong num of arguments.");
+    if (typeid(*params[0]) == typeid(NilValue))
+        return std::make_shared<NumericValue>(0);
+    if (typeid(*params[0]) != typeid(PairValue))
+        throw LispError("wrong type of arguments.");
+    int len = 1;
+    ValuePtr temp = params[0];
+    while (typeid(*temp) == typeid(PairValue)) {
+        PairValue* temporary = dynamic_cast<PairValue*>(&(*temp));
+        temp = temporary->right();
+        len++;
+    };
+    if (typeid(*temp) == typeid(NilValue)) len--;
+    return std::make_shared<NumericValue>(len);
+};
+
+ValuePtr my_list_make(const std::vector<ValuePtr>& params) {
+    if (params.size() == 0) return ValuePtr(new NilValue);
+    int num = params.size();
+    ValuePtr temp = ValuePtr(new PairValue(params[num - 1], ValuePtr(new NilValue)));
+    if (params.size() == 1) return temp;
+    ValuePtr temporary;
+    for (int i = num - 2; i >= 0; i--) {
+        temporary = ValuePtr(new PairValue(params[i], temp));
+        temp = temporary;
+    }
+    return temp;
+};
+
+ValuePtr my_append(const std::vector<ValuePtr>& params) {
+    if (params.size() == 0) return ValuePtr(new NilValue);
+    int num = params.size();
+    std::vector<ValuePtr> temp;
+    for (int i = 0; i < num; i++) {
+        std::vector<ValuePtr> temporary = params[i]->toVector();
+        temp.insert(temp.end(), temporary.begin() , temporary.end());
+    };
+    return my_list_make(temp);
+};
+
 std::unordered_map<std::string, BuiltinFuncType*> builtin::load_list;
 std::vector<std::string> builtin::loadReference;

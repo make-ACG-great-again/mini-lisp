@@ -90,6 +90,10 @@ public:
     static std::vector<std::shared_ptr<Value>> v;
     std::vector<std::shared_ptr<Value>> toVector();
     std::optional<std::string> asSymbol();
+    ValuePtr left() const {
+        ValuePtr temp = this->t1;
+        return temp;
+    };
     ValuePtr right()const{
         ValuePtr temp = this->t2;
         return temp;

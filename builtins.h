@@ -7,6 +7,7 @@
 
 using ValuePtr = std::shared_ptr<Value>;
 using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&);
+
 //算术运算库
 ValuePtr my_add(const std::vector<ValuePtr>& params);
 ValuePtr my_minus(const std::vector<ValuePtr>& params);
@@ -33,6 +34,22 @@ ValuePtr my_exit(const std::vector<ValuePtr>& params);
 ValuePtr my_newline(const std::vector<ValuePtr>& params);
 //类型检查库
 ValuePtr my_atom(const std::vector<ValuePtr>& params);
+ValuePtr my_boolean(const std::vector<ValuePtr>& params);
+ValuePtr my_integer(const std::vector<ValuePtr>& params);
+ValuePtr my_list(const std::vector<ValuePtr>& params);
+ValuePtr my_number(const std::vector<ValuePtr>& params);
+ValuePtr my_null(const std::vector<ValuePtr>& params);
+ValuePtr my_pair(const std::vector<ValuePtr>& params);
+ValuePtr my_procedure(const std::vector<ValuePtr>& params);
+ValuePtr my_string(const std::vector<ValuePtr>& params);
+ValuePtr my_symbol(const std::vector<ValuePtr>& params);
+//对子与列表操作库
+ValuePtr my_car(const std::vector<ValuePtr>& params);
+ValuePtr my_cdr(const std::vector<ValuePtr>& params);
+ValuePtr my_cons(const std::vector<ValuePtr>& params);
+ValuePtr my_length(const std::vector<ValuePtr>& params);
+ValuePtr my_list_make(const std::vector<ValuePtr>& params);
+ValuePtr my_append(const std::vector<ValuePtr>& params);
 
 class builtin {
 public:
@@ -109,6 +126,52 @@ public:
         std::string atom = "atom?";
         load_list[atom] = &my_atom;
         loadReference.push_back(atom);
+        std::string boolean = "boolean?";
+        load_list[boolean] = &my_boolean;
+        loadReference.push_back(boolean);
+        std::string integer = "integer?";
+        load_list[integer] = &my_integer;
+        loadReference.push_back(integer);
+        std::string list = "list?";
+        load_list[list] = &my_list;
+        loadReference.push_back(list);
+        std::string number = "number?";
+        load_list[number] = &my_number;
+        loadReference.push_back(number);
+        std::string null = "null?";
+        load_list[null] = &my_null;
+        loadReference.push_back(null);
+        std::string pair = "pair?";
+        load_list[pair] = &my_pair;
+        loadReference.push_back(pair);
+        std::string procedure = "procedure?";
+        load_list[procedure] = &my_procedure;
+        loadReference.push_back(procedure);
+        std::string string = "string?";
+        load_list[string] = &my_string;
+        loadReference.push_back(string);
+        std::string symbol = "symbol?";
+        load_list[symbol] = &my_symbol;
+        loadReference.push_back(symbol);
+        //对子与列表操作库
+        std::string car = "car";
+        load_list[car] = &my_car;
+        loadReference.push_back(car);
+        std::string cdr = "cdr";
+        load_list[cdr] = &my_cdr;
+        loadReference.push_back(cdr);
+        std::string cons = "cons";
+        load_list[cons] = &my_cons;
+        loadReference.push_back(cons);
+        std::string length = "length";
+        load_list[length] = &my_length;
+        loadReference.push_back(length);
+        std::string list_make = "list";
+        load_list[list_make] = &my_list_make;
+        loadReference.push_back(list_make);
+        std::string append = "append";
+        load_list[append] = &my_append;
+        loadReference.push_back(append);
         return loadReference;
     }
 };
