@@ -9,19 +9,24 @@
 
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     std::optional<std::string> name = args[1]->asSymbol(); 
-    if (size(args) == 3) {
-        if (typeid(*args[1]) == typeid(PairValue)) {
-            std::vector<std::string> temp;
-            std::ranges::transform(
-                args[1]->toVector(), std::back_inserter(temp),
-                [](ValuePtr v) { return v->toString(); });
-            std::vector<std::string> s{};
-            if (temp.size() > 1)
-                std::copy(temp.begin() + 1, temp.end(), std::back_inserter(s));
-            env.myMap.insert(
-                std::make_pair(temp[0], make_shared<LambdaValue>(s, args[2]->toVector())));
+    if (typeid(*args[1]) == typeid(PairValue)) {
+        std::vector<std::string> temp;
+        std::ranges::transform(args[1]->toVector(), std::back_inserter(temp),
+                               [](ValuePtr v) { return v->toString(); });
+        std::vector<std::string> s{};
+        if (temp.size() > 1)
+            std::copy(temp.begin() + 1, temp.end(), std::back_inserter(s));
+        if (args.size() < 3) {
+            throw LispError("illegal if.");
             return ValuePtr(new NilValue());
         }
+        std::vector<ValuePtr> temporary;
+        temporary.insert(temporary.end(), args.begin() + 2, args.end());
+        env.myMap.insert(std::make_pair(
+            temp[0], make_shared<LambdaValue>(s, temporary)));
+        return ValuePtr(new NilValue());
+    }
+    if (size(args) == 3) {
         auto tem = env.eval(args[2]);
         if (auto temp = env.myMap[tem->asSymbol()]) tem = temp;
         //env.myMap.insert(std::make_pair(name , tem));
@@ -86,13 +91,16 @@ ValuePtr orForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    if (args.size() != 3) {
-        return std::make_shared<BooleanValue>(false);
+    if (args.size() < 3) {
+        throw LispError("illegal if.");
+        return ValuePtr(new NilValue());
     }
+    std::vector<ValuePtr> temporary;
+    temporary.insert(temporary.end() , args.begin() + 2, args.end());
     std::vector<std::string> temp;
     std::ranges::transform(args[1]->toVector(), std::back_inserter(temp),
                            [](ValuePtr v) { return v->toString(); });
-    return std::make_shared<LambdaValue>(temp, args[2]->toVector());
+    return std::make_shared<LambdaValue>(temp, temporary);
 }
 
 const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS{
