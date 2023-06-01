@@ -8,8 +8,6 @@
 #include "./value.h"
 using namespace std::literals;  // 使用 s 后缀
 
-
-std::unordered_map<std::optional<std::string>, ValuePtr> EvalEnv::myMap;
 using SpecialFormType = ValuePtr(const std::vector<ValuePtr>&, EvalEnv&);
 extern const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;
 
@@ -60,16 +58,13 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
                 return ValuePtr(new NilValue());
         }
     } else if (typeid(*expr) == typeid(SymbolValue)) {
-        if (auto value = myMap[expr->asSymbol()]) {
-            return value;
-        } else {
-            //std::cout << expr->toString();
-            throw LispError("Variable " + expr->toString() + " not defined.");
-            return ValuePtr(new NilValue());
-        }
+        if(this->lookupBinding(expr)) return this->lookupBinding(expr);
+        else throw LispError("Variable " + expr->toString() + " not defined.");
     } else if (typeid(*expr) == typeid(BuiltinProcValue)) {
         return expr;
-    }else {
+    } else if (typeid(*expr) == typeid(LambdaValue)) {
+        return expr;
+    } else {
         throw LispError("Unimplemented");
         return ValuePtr(new NilValue());
     }
@@ -88,7 +83,28 @@ ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {
         const BuiltinProcValue* tempptr =
             dynamic_cast<BuiltinProcValue*>(&(*proc));
         return tempptr->procedure(args);
+    } else if (typeid(*proc) == typeid(LambdaValue)) {
+        const LambdaValue* tempptr =
+            dynamic_cast<LambdaValue*>(&(*proc));
+        return tempptr->apply(args);
     } else {
         throw LispError("Unimplemented");
     }
 }
+
+ValuePtr EvalEnv::lookupBinding(ValuePtr target) {
+    if (this->myMap.count(target->asSymbol()) > 0)
+        return this->myMap[target->asSymbol()];
+    else if (this->parent == nullptr) {
+        return nullptr;
+    } else return this->parent->lookupBinding(target);
+};
+
+ValuePtr EvalEnv::defineBinding(std::string target, ValuePtr content){
+    auto tem = this->eval(content);
+    if (this->lookupBinding(tem) != nullptr) tem = this->lookupBinding(tem);
+    if (this->myMap.count(target) > 0)
+        this->myMap[target] = tem;
+    else this->myMap.insert(std::make_pair(target, tem));
+    return ValuePtr(new NilValue);
+};

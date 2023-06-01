@@ -5,10 +5,13 @@
 #include<memory>
 #include<vector>
 #include<optional>
+#include "./error.h"
+//#include "./eval_env.h"
 
 // 你的代码
 
 //using ValuePtr = std::shared_ptr<Value>;
+class EvalEnv;
 
 class Value {
 public:
@@ -120,8 +123,10 @@ private:
     std::vector<ValuePtr> body;
     // [...]
 public:
-    LambdaValue(const std::vector<std::string>& params,const std::vector<ValuePtr>& body)
-        : params{params}, body{body} {};
+    std::shared_ptr<EvalEnv> environment;
+    ValuePtr apply(const std::vector<ValuePtr>& args) const;
+    LambdaValue(const std::vector<std::string>& params,const std::vector<ValuePtr>& body, std::shared_ptr<EvalEnv> env)
+        : params{params}, body{body}, environment{env} {};
     std::string toString() const override;  // 如前所述，返回 #<procedure> 即可
 };
 

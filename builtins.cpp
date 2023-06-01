@@ -282,14 +282,7 @@ ValuePtr my_atom(const std::vector<ValuePtr>& params){
         typeid(*params[0]) == typeid(NilValue()))
         return std::make_shared<BooleanValue>(true);
     else if (typeid(*params[0]) == typeid(SymbolValue)) {
-        if (auto value = EvalEnv::myMap[params[0]->asSymbol()]) return std::make_shared<BooleanValue>(true);
-        else if (SPECIAL_FORMS.count(params[0]->asSymbol().value()) > 0)
-            return std::make_shared<BooleanValue>(false);
-        else {
-            throw LispError("Variable " + params[0]->toString() +
-                            " not defined.");
-            return ValuePtr(new NilValue());
-        }
+        return std::make_shared<BooleanValue>(true);
     } else
         return std::make_shared<BooleanValue>(false);
 };

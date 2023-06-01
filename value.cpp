@@ -2,6 +2,7 @@
 #include <sstream>
 #include<vector>
 #include "./value.h"
+#include "./eval_env.h"
 
 BooleanValue::BooleanValue(bool b) {
 	this->b = b;
@@ -158,3 +159,16 @@ std::string LambdaValue::toString() const {
     return "#<procedure>";
 };
 
+ValuePtr LambdaValue::apply(const std::vector<ValuePtr>& args) const {
+    std::shared_ptr<EvalEnv> calculate = EvalEnv::createGlobal();
+    if (params.size() != args.size())
+        throw LispError("wrong num of arguments.");
+    for (int i = 0; i < params.size(); i++)
+        calculate->defineBinding(params[i], args[i]);
+    calculate->parent = this->environment;
+    for (int i = 0; i < body.size(); i++) {
+        if (i < body.size() - 1) calculate->eval(body[i]);
+        else
+            return calculate->eval(body[i]);
+    };
+};

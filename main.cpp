@@ -4,17 +4,18 @@
 #include "./tokenizer.h"
 #include "./parser.h"
 #include "./eval_env.h"
-#include "./rjsj_test.hpp"
 #include "./builtins.h"
 #include "./value.h"
+#include "./rjsj_test.hpp"
 
 struct TestCtx {
-    EvalEnv env;
+    //EvalEnv env;
+    std::shared_ptr<EvalEnv> env = EvalEnv::createGlobal();
     std::string eval(std::string input) {
         auto tokens = Tokenizer::tokenize(input);
         Parser parser(std::move(tokens));
         auto value = parser.parse();
-        auto result = env.eval(std::move(value));
+        auto result = env->eval(std::move(value));
         return result->toString();
     }
 };
@@ -24,7 +25,9 @@ int main() {
     //RJSJ_TEST(TestCtx, Lv2, Lv3);
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4);
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5);
+    RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv6);
     // [...]
+    auto env = EvalEnv::createGlobal();  // 求值
     while (true) {
         try {
             std::cout << ">>> ";
@@ -39,9 +42,8 @@ int main() {
             //} //词法分析器
             Parser parser(std::move(tokens));  // tokenptr 不支持复制
             auto value = parser.parse();
-            //std::cout << value->toString() << std::endl;  // 输出外部表示   //语法分析器
-            EvalEnv env; //求值
-            auto result = env.eval(std::move(value)); //求值
+            //std::cout << value->toString() << std::endl;  // 输出外部表示   //语法分析
+            auto result = env->eval(std::move(value)); //求值
             //if (result == nullptr) std::cout << "error" << std::endl;
             std::cout << result->toString() << std::endl; //求值
         } catch (std::runtime_error& e) {

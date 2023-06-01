@@ -22,16 +22,15 @@ ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
         }
         std::vector<ValuePtr> temporary;
         temporary.insert(temporary.end(), args.begin() + 2, args.end());
-        env.myMap.insert(std::make_pair(
-            temp[0], make_shared<LambdaValue>(s, temporary)));
+        env.defineBinding(temp[0], make_shared<LambdaValue>(s, temporary, env.shared_from_this()));
         return ValuePtr(new NilValue());
     }
     if (size(args) == 3) {
         auto tem = env.eval(args[2]);
-        if (auto temp = env.myMap[tem->asSymbol()]) tem = temp;
+        if (env.lookupBinding(tem) != nullptr) tem = env.lookupBinding(tem);
         //env.myMap.insert(std::make_pair(name , tem));
         // args.clear();
-        env.myMap[name] = tem;
+        env.defineBinding(name.value(), tem);
         return ValuePtr(new NilValue());
     } else {
         throw LispError("illegal define.");
@@ -100,7 +99,7 @@ ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     std::vector<std::string> temp;
     std::ranges::transform(args[1]->toVector(), std::back_inserter(temp),
                            [](ValuePtr v) { return v->toString(); });
-    return std::make_shared<LambdaValue>(temp, temporary);
+    return std::make_shared<LambdaValue>(temp, temporary , env.shared_from_this());
 }
 
 const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS{
