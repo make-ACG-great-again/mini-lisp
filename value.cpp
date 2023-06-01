@@ -21,6 +21,17 @@ std::optional<std::string> BooleanValue::asSymbol() {
         return std::string{"#f"};
 }
 
+bool BooleanValue::operator==(std::shared_ptr<Value> temp) {
+    if (typeid(*temp) != typeid(BooleanValue)) {
+        return false;
+    }
+    BooleanValue* t = dynamic_cast<BooleanValue*>(&*temp);
+    if (t->b == this->b)
+        return true;
+    else
+        return false;
+};
+
 NumericValue::NumericValue(double n) {
 	d = n;
 }
@@ -48,6 +59,17 @@ std::optional<std::string> NumericValue::asSymbol() {
         return std::to_string(d);
 }
 
+bool NumericValue::operator==(std::shared_ptr<Value> temp) {
+    if (typeid(*temp) != typeid(NumericValue)) {
+        return false;
+    }
+    NumericValue* t = dynamic_cast<NumericValue*>(&*temp);
+    if (t->d == this->d)
+        return true;
+    else
+        return false;
+};
+
 StringValue::StringValue(std::string s) : c{ s } {};
 std::string StringValue::toString() const {
     std::ostringstream oss;
@@ -63,6 +85,17 @@ std::optional<std::string> StringValue::asSymbol() {
     return quotedStr;
 }
 
+bool StringValue::operator==(std::shared_ptr<Value> temp) {
+    if (typeid(*temp) != typeid(StringValue)) {
+        return false;
+    }
+    StringValue* t = dynamic_cast<StringValue*>(&*temp);
+    if (t->c == this->c)
+        return true;
+    else
+        return false;
+};
+
 NilValue::NilValue() {};
 std::string NilValue::toString()const {
 	return std::string{ "()" };
@@ -71,6 +104,13 @@ std::string NilValue::toString()const {
 std::optional<std::string> NilValue::asSymbol() {
     return std::string{"()"};
 }
+
+bool NilValue::operator==(std::shared_ptr<Value> temp) {
+    if (typeid(*temp) != typeid(NilValue)) {
+        return false;
+    }
+    else return true;
+};
 
 SymbolValue::SymbolValue(std::string k) :c{ k } {};
 std::string SymbolValue::toString() const {
@@ -86,6 +126,17 @@ std::string SymbolValue::toString() const {
 std::optional<std::string> SymbolValue::asSymbol() {
     return c;
 }
+
+bool SymbolValue::operator==(std::shared_ptr<Value> temp) {
+    if (typeid(*temp) != typeid(SymbolValue)) {
+        return false;
+    }
+    SymbolValue* t = dynamic_cast<SymbolValue*>(&*temp);
+    if (t->c == this->c)
+        return true;
+    else
+        return false;
+};
 
 bool PairValue::kh = 1;
 bool PairValue::out = 1;
@@ -151,8 +202,30 @@ std::optional<std::string> PairValue::asSymbol() {
     return s;
 }
 
+bool PairValue::operator==(std::shared_ptr<Value> temp) {
+    if (typeid(*temp) != typeid(PairValue)) {
+        return false;
+    }
+    PairValue* t = dynamic_cast<PairValue*>(&*temp);
+    if (*t->t1 == this->t1 && *t->t2 == this->t2)
+        return true;
+    else
+        return false;
+};
+
 std::string BuiltinProcValue::toString() const {
     return "#<procedure>";
+};
+
+bool BuiltinProcValue::operator==(std::shared_ptr<Value> temp) {
+    if (typeid(*temp) != typeid(BuiltinProcValue)) {
+        return false;
+    }
+    BuiltinProcValue* t = dynamic_cast<BuiltinProcValue*>(&*temp);
+    if (t->procedure == this->procedure)
+        return true;
+    else
+        return false;
 };
 
 std::string LambdaValue::toString() const {
@@ -171,4 +244,24 @@ ValuePtr LambdaValue::apply(const std::vector<ValuePtr>& args) const {
         else
             return calculate->eval(body[i]);
     };
+};
+
+bool LambdaValue::operator==(std::shared_ptr<Value> temp) {
+    if (typeid(*temp) != typeid(LambdaValue)) {
+        return false;
+    }
+    LambdaValue* t = dynamic_cast<LambdaValue*>(&*temp);
+    std::vector<Value> result;
+    if (t->params == this->params) {
+        if (t->body.size() == this->body.size()) {
+            for (int i = 0; i < this->body.size(); i++) {
+                if (*t->body[i] == this->body[i])
+                    continue;
+                else
+                    return false;
+            }
+            return true;
+        } else return false;
+    }else
+        return false;
 };

@@ -29,6 +29,9 @@ public:
     virtual double asNumber() {
         return 0;
     };
+    virtual bool operator==(std::shared_ptr<Value> temp) {
+        return false;
+    };
 };
 
 using ValuePtr = std::shared_ptr<Value>;
@@ -39,7 +42,7 @@ public:
 	BooleanValue(bool b);
 	std::string toString()const;
     std::optional<std::string> asSymbol();
-	
+    bool operator==(std::shared_ptr<Value> temp);
 };
 
 class NumericValue : public Value {
@@ -54,6 +57,7 @@ public:
     double asNumber() {
         return d;
     };
+    bool operator==(std::shared_ptr<Value> temp);
 };
 
 class StringValue : public Value {
@@ -62,6 +66,7 @@ public:
 	StringValue(std::string s);
 	std::string toString()const;
     std::optional<std::string> asSymbol();
+    bool operator==(std::shared_ptr<Value> temp);
 };
 
 class NilValue : public Value {
@@ -69,6 +74,7 @@ public:
 	NilValue();
 	std::string toString()const;
     std::optional<std::string> asSymbol();
+    bool operator==(std::shared_ptr<Value> temp);
 };
 
 class SymbolValue : public Value {
@@ -77,6 +83,7 @@ public:
 	SymbolValue(std::string k);
 	std::string toString()const;
     std::optional<std::string> asSymbol();
+    bool operator==(std::shared_ptr<Value> temp);
 };
 
 //template<typename T1, typename T2>
@@ -101,6 +108,7 @@ public:
         ValuePtr temp = this->t2;
         return temp;
     };
+    bool operator==(std::shared_ptr<Value> temp);
 };
 
 //typedef ValuePtr (*FuncPtr)(const std::vector<ValuePtr>&);
@@ -115,6 +123,7 @@ public:
     BuiltinProcValue(BuiltinFuncType* p) : procedure(p){};
     // 直接返回 #<procedure> 就可以，我们不做更多要求。
     std::string toString() const override;
+    bool operator==(std::shared_ptr<Value> temp);
 };
 
 class LambdaValue : public Value {
@@ -128,6 +137,7 @@ public:
     LambdaValue(const std::vector<std::string>& params,const std::vector<ValuePtr>& body, std::shared_ptr<EvalEnv> env)
         : params{params}, body{body}, environment{env} {};
     std::string toString() const override;  // 如前所述，返回 #<procedure> 即可
+    bool operator==(std::shared_ptr<Value> temp);
 };
 
 

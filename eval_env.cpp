@@ -101,10 +101,10 @@ ValuePtr EvalEnv::lookupBinding(ValuePtr target) {
 };
 
 ValuePtr EvalEnv::defineBinding(std::string target, ValuePtr content){
-    auto tem = this->eval(content);
-    if (this->lookupBinding(tem) != nullptr) tem = this->lookupBinding(tem);
+    /*auto tem = this->eval(content);
+    if (this->lookupBinding(tem) != nullptr) tem = this->lookupBinding(tem);*/
     if (this->myMap.count(target) > 0)
-        this->myMap[target] = tem;
-    else this->myMap.insert(std::make_pair(target, tem));
+        this->myMap[target] = content;
+    else this->myMap.insert(std::make_pair(target, content));
     return ValuePtr(new NilValue);
 };

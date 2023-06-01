@@ -8,7 +8,7 @@
 using ValuePtr = std::shared_ptr<Value>;
 using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&);
 
-//算术运算库
+//算术运算库 - 9/9
 ValuePtr my_add(const std::vector<ValuePtr>& params);
 ValuePtr my_minus(const std::vector<ValuePtr>& params);
 ValuePtr my_multiply(const std::vector<ValuePtr>& params);
@@ -18,7 +18,7 @@ ValuePtr my_expt(const std::vector<ValuePtr>& params);
 ValuePtr my_quotient(const std::vector<ValuePtr>& params);
 ValuePtr my_remainder(const std::vector<ValuePtr>& params);
 ValuePtr my_modulo(const std::vector<ValuePtr>& params);
-//比较库
+//比较库 - 11/11
 ValuePtr my_equal(const std::vector<ValuePtr>& params);
 ValuePtr my_greater(const std::vector<ValuePtr>& params);
 ValuePtr my_less(const std::vector<ValuePtr>& params);
@@ -27,12 +27,15 @@ ValuePtr my_no_less(const std::vector<ValuePtr>& params);
 ValuePtr my_even(const std::vector<ValuePtr>& params);
 ValuePtr my_odd(const std::vector<ValuePtr>& params);
 ValuePtr my_zero(const std::vector<ValuePtr>& params);
-//核心库
+ValuePtr my_eq(const std::vector<ValuePtr>& params);
+ValuePtr my_equal_for_content(const std::vector<ValuePtr>& params);
+ValuePtr my_not(const std::vector<ValuePtr>& params);
+//核心库 - 4/8
 ValuePtr my_print(const std::vector<ValuePtr>& params);
 ValuePtr my_display(const std::vector<ValuePtr>& params);
 ValuePtr my_exit(const std::vector<ValuePtr>& params);
 ValuePtr my_newline(const std::vector<ValuePtr>& params);
-//类型检查库
+//类型检查库 - 10/10
 ValuePtr my_atom(const std::vector<ValuePtr>& params);
 ValuePtr my_boolean(const std::vector<ValuePtr>& params);
 ValuePtr my_integer(const std::vector<ValuePtr>& params);
@@ -43,7 +46,7 @@ ValuePtr my_pair(const std::vector<ValuePtr>& params);
 ValuePtr my_procedure(const std::vector<ValuePtr>& params);
 ValuePtr my_string(const std::vector<ValuePtr>& params);
 ValuePtr my_symbol(const std::vector<ValuePtr>& params);
-//对子与列表操作库
+//对子与列表操作库 - 6/9
 ValuePtr my_car(const std::vector<ValuePtr>& params);
 ValuePtr my_cdr(const std::vector<ValuePtr>& params);
 ValuePtr my_cons(const std::vector<ValuePtr>& params);
@@ -109,6 +112,15 @@ public:
         std::string zero = "zero?";
         load_list[zero] = &my_zero;
         loadReference.push_back(zero);
+        std::string eq = "eq?";
+        load_list[eq] = &my_eq;
+        loadReference.push_back(eq);
+        std::string equal_for_content = "equal?";
+        load_list[equal_for_content] = &my_equal_for_content;
+        loadReference.push_back(equal_for_content);
+        std::string not_t = "not";
+        load_list[not_t] = &my_not;
+        loadReference.push_back(not_t);
         //核心库
         std::string print = "print";
         load_list[print] = &my_print;

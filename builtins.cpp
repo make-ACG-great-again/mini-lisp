@@ -238,6 +238,37 @@ ValuePtr my_zero(const std::vector<ValuePtr>& params) {
     return std::make_shared<BooleanValue>(params[0]->asNumber() == 0);
 };
 
+ValuePtr my_eq(const std::vector<ValuePtr>& params){
+    if (params.size() != 2) {
+        throw LispError("wrong num of arguments.");
+    }
+    if (params[0] == params[1]) return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_equal_for_content(const std::vector<ValuePtr>& params) {
+    if (params.size() != 2) {
+        throw LispError("wrong num of arguments.");
+    }
+    if (typeid(params[0]) != typeid(params[1]))
+        return std::make_shared<BooleanValue>(false);
+    if (*params[0] == params[1])
+        return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
+ValuePtr my_not(const std::vector<ValuePtr>& params) {
+    if (params.size() != 1) {
+        throw LispError("wrong num of arguments.");
+    }
+    if (params[0]->toString() == "#f" || params[0]->toString() == "false")
+        return std::make_shared<BooleanValue>(true);
+    else
+        return std::make_shared<BooleanValue>(false);
+};
+
 //核心库
 ValuePtr my_print(const std::vector<ValuePtr>& params){
     for (auto i : params) {

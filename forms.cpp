@@ -49,6 +49,13 @@ ValuePtr quoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    if (args.size() == 3) {
+        if (env.eval(args[1])->toString() == "#f" ||
+            env.eval(args[1])->toString() == "false") {
+            return ValuePtr(new NilValue());
+        } else
+            return env.eval(args[2]);
+    }
     if (args.size() != 4) {
         throw LispError("illegal if.");
         return ValuePtr(new NilValue());
