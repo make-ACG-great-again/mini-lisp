@@ -10,6 +10,7 @@ using namespace std::literals;  // 使用 s 后缀
 
 using SpecialFormType = ValuePtr(const std::vector<ValuePtr>&, EvalEnv&);
 extern const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;
+std::vector<std::shared_ptr<EvalEnv>> EvalEnv::eval_environment{};
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
     if (typeid(*expr) == typeid(BooleanValue) ||
@@ -34,8 +35,12 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
                 ValuePtr proc = this->eval(v[0]);
                 const PairValue* tempptr = dynamic_cast<PairValue*>(&(*expr));
                 std::vector<ValuePtr> args = this->evalList(tempptr->right());
+                if (v[0]->asSymbol() == "eval")
+                    EvalEnv::eval_environment.push_back(
+                        this->shared_from_this());
                 v.clear();
-                return this->apply(proc, args);
+                auto temp = this->apply(proc, args);
+                return temp;
             }
         //} else{ // if (auto name = v[0]->asSymbol()) {
                 //if (auto value = myMap[name]) {

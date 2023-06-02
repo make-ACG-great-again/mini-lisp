@@ -21,6 +21,7 @@ public:
     static std::shared_ptr<EvalEnv> createGlobal() {
         return make_shared<EvalEnv>(EvalEnv());
     };
+    static std::vector<std::shared_ptr<EvalEnv>> eval_environment;
     std::shared_ptr<EvalEnv> parent;
     std::unordered_map<std::optional<std::string>, ValuePtr> myMap;
     ValuePtr eval(ValuePtr expr);

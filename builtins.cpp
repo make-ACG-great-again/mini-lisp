@@ -308,6 +308,52 @@ ValuePtr my_newline(const std::vector<ValuePtr>& params) {
     return std::make_shared<NilValue>();
 };
 
+ValuePtr my_error(const std::vector<ValuePtr>& params) {
+    double n = 0;
+    if (params.size() > 1) throw LispError("wrong num of arguments.");
+    if (params.size() == 1) {
+        throw LispError(params[0]->toString());
+    } else
+        throw LispError("");
+};
+
+ValuePtr my_apply(const std::vector<ValuePtr>& params){
+    if (params.size() != 2) throw LispError("wrong num of arguments.");
+    ValuePtr proc = params[0];
+    ValuePtr list = params[1];
+    if (typeid(*proc) == typeid(BuiltinProcValue)) {
+        const BuiltinProcValue* tempptr =
+            dynamic_cast<BuiltinProcValue*>(&(*proc));
+        return tempptr->procedure(list->toVector());
+    } else if (typeid(*proc) == typeid(LambdaValue)) {
+        const LambdaValue* tempptr = dynamic_cast<LambdaValue*>(&(*proc));
+        return tempptr->apply(list->toVector());
+    } else {
+        throw LispError("wrong type of proc.");
+    }
+};
+
+ValuePtr my_displayln(const std::vector<ValuePtr>& params){
+    if (params.size() != 1)
+        throw LispError("wrong num of arguments.");
+    my_display(std::vector<ValuePtr>{params[0]});
+    my_newline(std::vector<ValuePtr>{(ValuePtr(new NilValue))});
+    return ValuePtr(new NilValue);
+};
+
+ValuePtr my_eval(const std::vector<ValuePtr>& params){
+    if (params.size() != 1)
+        throw LispError("wrong num of arguments.");
+    ValuePtr expr = params[0];
+    if (EvalEnv::eval_environment.size() == 0)
+        throw LispError("Cannot find eval-environment.");
+    else {
+        EvalEnv& temp_env = *EvalEnv::eval_environment.back();
+        EvalEnv::eval_environment.pop_back();
+        return temp_env.eval(expr);
+    }
+};
+
 //类型检查库
 ValuePtr my_atom(const std::vector<ValuePtr>& params){
     if (params.size() != 1) throw LispError("wrong num of arguments.");

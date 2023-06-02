@@ -30,11 +30,15 @@ ValuePtr my_zero(const std::vector<ValuePtr>& params);
 ValuePtr my_eq(const std::vector<ValuePtr>& params);
 ValuePtr my_equal_for_content(const std::vector<ValuePtr>& params);
 ValuePtr my_not(const std::vector<ValuePtr>& params);
-//核心库 - 4/8
+//核心库 - 8/8
 ValuePtr my_print(const std::vector<ValuePtr>& params);
 ValuePtr my_display(const std::vector<ValuePtr>& params);
 ValuePtr my_exit(const std::vector<ValuePtr>& params);
 ValuePtr my_newline(const std::vector<ValuePtr>& params);
+ValuePtr my_error(const std::vector<ValuePtr>& params);
+ValuePtr my_apply(const std::vector<ValuePtr>& params);
+ValuePtr my_displayln(const std::vector<ValuePtr>& params);
+ValuePtr my_eval(const std::vector<ValuePtr>& params);
 //类型检查库 - 10/10
 ValuePtr my_atom(const std::vector<ValuePtr>& params);
 ValuePtr my_boolean(const std::vector<ValuePtr>& params);
@@ -137,6 +141,18 @@ public:
         std::string newline = "newline";
         load_list[newline] = &my_newline;
         loadReference.push_back(newline);
+        std::string error = "error";
+        load_list[error] = &my_error;
+        loadReference.push_back(error);
+        std::string apply = "apply";
+        load_list[apply] = &my_apply;
+        loadReference.push_back(apply);
+        std::string displayln = "displayln";
+        load_list[displayln] = &my_displayln;
+        loadReference.push_back(displayln);
+        std::string eval = "eval";
+        load_list[eval] = &my_eval;
+        loadReference.push_back(eval);
         //类型检查库
         std::string atom = "atom?";
         load_list[atom] = &my_atom;
