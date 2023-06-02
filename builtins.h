@@ -46,13 +46,16 @@ ValuePtr my_pair(const std::vector<ValuePtr>& params);
 ValuePtr my_procedure(const std::vector<ValuePtr>& params);
 ValuePtr my_string(const std::vector<ValuePtr>& params);
 ValuePtr my_symbol(const std::vector<ValuePtr>& params);
-//对子与列表操作库 - 6/9
+//对子与列表操作库 - 9/9
 ValuePtr my_car(const std::vector<ValuePtr>& params);
 ValuePtr my_cdr(const std::vector<ValuePtr>& params);
 ValuePtr my_cons(const std::vector<ValuePtr>& params);
 ValuePtr my_length(const std::vector<ValuePtr>& params);
 ValuePtr my_list_make(const std::vector<ValuePtr>& params);
 ValuePtr my_append(const std::vector<ValuePtr>& params);
+ValuePtr my_map(const std::vector<ValuePtr>& params);
+ValuePtr my_filter(const std::vector<ValuePtr>& params);
+ValuePtr my_reduce(const std::vector<ValuePtr>& params);
 
 class builtin {
 public:
@@ -184,6 +187,15 @@ public:
         std::string append = "append";
         load_list[append] = &my_append;
         loadReference.push_back(append);
+        std::string map = "map";
+        load_list[map] = &my_map;
+        loadReference.push_back(map);
+        std::string filter = "filter";
+        load_list[filter] = &my_filter;
+        loadReference.push_back(filter);
+        std::string reduce = "reduce";
+        load_list[reduce] = &my_reduce;
+        loadReference.push_back(reduce);
         return loadReference;
     }
 };

@@ -215,7 +215,9 @@ ValuePtr my_even(const std::vector<ValuePtr>& params) {
     if (!params[0]->isNumber()) {
         throw LispError("Cannot put a non-numeric value.");
     }
-    return std::make_shared<BooleanValue>(!(params[0]->asNumber() / 2));
+    double temp = params[0]->asNumber();
+    if (temp != int(temp)) throw LispError("wrong type of param.");
+    return std::make_shared<BooleanValue>(!(int(temp) % 2));
 };
 
 ValuePtr my_odd(const std::vector<ValuePtr>& params) {
@@ -225,7 +227,9 @@ ValuePtr my_odd(const std::vector<ValuePtr>& params) {
     if (!params[0]->isNumber()) {
         throw LispError("Cannot put a non-numeric value.");
     }
-    return std::make_shared<BooleanValue>(params[0]->asNumber() / 2);
+    double temp = params[0]->asNumber();
+    if (temp != int(temp)) throw LispError("wrong type of param.");
+    return std::make_shared<BooleanValue>(int(temp) % 2);
 };
 
 ValuePtr my_zero(const std::vector<ValuePtr>& params) {
@@ -462,6 +466,80 @@ ValuePtr my_append(const std::vector<ValuePtr>& params) {
         temp.insert(temp.end(), temporary.begin() , temporary.end());
     };
     return my_list_make(temp);
+};
+
+ValuePtr my_map(const std::vector<ValuePtr>& params){
+    if (params.size() != 2) throw LispError("wrong num of arguments.");
+    ValuePtr proc = params[0];
+    ValuePtr list = params[1];
+    if (typeid(*list) == typeid(NilValue)) return ValuePtr(new NilValue);
+    if (typeid(*list) != typeid(PairValue))
+        throw LispError("wrong type of list.");
+    std::vector<ValuePtr> lists = list->toVector();
+    std::vector<ValuePtr> temp;
+    if (typeid(*proc) == typeid(BuiltinProcValue)) {
+        const BuiltinProcValue* tempptr =
+            dynamic_cast<BuiltinProcValue*>(&(*proc));
+        for (int i = 0; i < lists.size(); i++)
+            temp.push_back(tempptr->procedure(std::vector<ValuePtr>{lists[i]}));
+        return my_list_make(temp);
+    } else if (typeid(*proc) == typeid(LambdaValue)) {
+        const LambdaValue* tempptr = dynamic_cast<LambdaValue*>(&(*proc));
+        for (int i = 0; i < lists.size(); i++)
+            temp.push_back(tempptr->apply(std::vector<ValuePtr>{lists[i]}));
+        return my_list_make(temp);
+    } else {
+        throw LispError("wrong type of proc.");
+    }
+};
+
+ValuePtr my_filter(const std::vector<ValuePtr>& params) {
+    if (params.size() != 2) throw LispError("wrong num of arguments.");
+    ValuePtr proc = params[0];
+    ValuePtr list = params[1];
+    if (typeid(*list) == typeid(NilValue)) return ValuePtr(new NilValue);
+    if (typeid(*list) != typeid(PairValue))
+        throw LispError("wrong type of list.");
+    std::vector<ValuePtr> lists = list->toVector();
+    std::vector<ValuePtr> temp;
+    if (typeid(*proc) == typeid(BuiltinProcValue)) {
+        const BuiltinProcValue* tempptr =
+            dynamic_cast<BuiltinProcValue*>(&(*proc));
+        for (int i = 0; i < lists.size(); i++)
+            if (tempptr->procedure(std::vector<ValuePtr>{lists[i]})->toString() != "#f")
+                temp.push_back(lists[i]);
+        return my_list_make(temp);
+    } else if (typeid(*proc) == typeid(LambdaValue)) {
+        const LambdaValue* tempptr = dynamic_cast<LambdaValue*>(&(*proc));
+        for (int i = 0; i < lists.size(); i++)
+            if (tempptr->apply(std::vector<ValuePtr>{lists[i]})->toString() != "#f")
+                temp.push_back(lists[i]);
+        return my_list_make(temp);
+    } else {
+        throw LispError("wrong type of proc.");
+    }
+};
+
+ValuePtr my_reduce(const std::vector<ValuePtr>& params){
+    if (params.size() != 2) throw LispError("wrong num of arguments.");
+    ValuePtr proc = params[0];
+    ValuePtr list = params[1];
+    if (typeid(*list) != typeid(PairValue))
+        throw LispError("wrong type of list.");
+    std::vector<ValuePtr> lists = list->toVector();
+    if (lists.size() == 1) return lists[0];
+    std::vector<ValuePtr> temp{my_car(std::vector<ValuePtr>{list}),
+                               my_reduce(std::vector<ValuePtr>{proc, my_cdr(std::vector<ValuePtr>{list})})};
+    if (typeid(*proc) == typeid(BuiltinProcValue)) {
+        const BuiltinProcValue* tempptr =
+            dynamic_cast<BuiltinProcValue*>(&(*proc));
+        return tempptr->procedure(temp);
+    } else if (typeid(*proc) == typeid(LambdaValue)) {
+        const LambdaValue* tempptr = dynamic_cast<LambdaValue*>(&(*proc));
+        return tempptr->apply(temp);
+    } else {
+        throw LispError("wrong type of proc.");
+    }
 };
 
 std::unordered_map<std::string, BuiltinFuncType*> builtin::load_list;
