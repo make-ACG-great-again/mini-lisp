@@ -246,9 +246,20 @@ ValuePtr my_eq(const std::vector<ValuePtr>& params){
     if (params.size() != 2) {
         throw LispError("wrong num of arguments.");
     }
-    if (params[0] == params[1]) return std::make_shared<BooleanValue>(true);
-    else
-        return std::make_shared<BooleanValue>(false);
+    if (typeid(*params[0]) == typeid(BooleanValue) ||
+        typeid(*params[0]) == typeid(NumericValue) ||
+        typeid(*params[0]) == typeid(SymbolValue) ||
+        typeid(*params[0]) == typeid(NilValue)) {
+        if (params[0]->toString() == params[1]->toString())
+            return std::make_shared<BooleanValue>(true);
+        else
+            return std::make_shared<BooleanValue>(false);
+    } else {
+        if (params[0] == params[1])
+            return std::make_shared<BooleanValue>(true);
+        else
+            return std::make_shared<BooleanValue>(false);
+    }
 };
 
 ValuePtr my_equal_for_content(const std::vector<ValuePtr>& params) {
@@ -360,7 +371,7 @@ ValuePtr my_atom(const std::vector<ValuePtr>& params){
     if (typeid(*params[0]) == typeid(BooleanValue) ||
         typeid(*params[0]) == typeid(NumericValue) ||
         typeid(*params[0]) == typeid(StringValue) ||
-        typeid(*params[0]) == typeid(NilValue()))
+        typeid(*params[0]) == typeid(NilValue))
         return std::make_shared<BooleanValue>(true);
     else if (typeid(*params[0]) == typeid(SymbolValue)) {
         return std::make_shared<BooleanValue>(true);
@@ -429,7 +440,8 @@ ValuePtr my_pair(const std::vector<ValuePtr>& params) {
 
 ValuePtr my_procedure(const std::vector<ValuePtr>& params) {
     if (params.size() != 1) throw LispError("wrong num of arguments.");
-    if (typeid(*params[0]) == typeid(BuiltinProcValue))
+    if (typeid(*params[0]) == typeid(BuiltinProcValue) ||
+        typeid(*params[0]) == typeid(LambdaValue))
         return std::make_shared<BooleanValue>(true);
     else
         return std::make_shared<BooleanValue>(false);

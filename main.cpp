@@ -26,7 +26,9 @@ int main() {
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4);
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5);
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv6);
-    RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7);
+    //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7);
+    //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib);
+    RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
     // [...]
     auto env = EvalEnv::createGlobal();  // 求值
     while (true) {

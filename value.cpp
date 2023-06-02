@@ -236,7 +236,8 @@ std::string LambdaValue::toString() const {
 };
 
 ValuePtr LambdaValue::apply(const std::vector<ValuePtr>& args) const {
-    std::shared_ptr<EvalEnv> calculate = EvalEnv::createGlobal();
+    std::shared_ptr<EvalEnv> calculate =
+        std::make_shared<EvalEnv>(*this->environment);
     if (params.size() != args.size())
         throw LispError("wrong num of arguments.");
     for (int i = 0; i < params.size(); i++)
