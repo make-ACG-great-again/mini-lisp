@@ -144,7 +144,10 @@ std::vector<std::shared_ptr<Value>> PairValue::v = {};
 
 PairValue::PairValue(ValuePtr t11, ValuePtr t22) : t1{ t11 }, t2{ t22 } {};
 std::string PairValue::toString() const {
+    bool t = kh;
+    kh = 1;
 	std::string s1 = t1->toString();
+    kh = t;
 	//std::string s2 = t2->toString();
 	std::string s2;
 	Value* temp = &*t2;

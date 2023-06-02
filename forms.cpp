@@ -120,12 +120,10 @@ ValuePtr condForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
         std::vector<ValuePtr> list = i->toVector();
         if (list.size() == 0) throw LispError("wrong num of arguments.");
         auto condition = list[0];
-        auto temp = env.eval(condition);
-        if (temp->asSymbol() == "else") {
-            if (num != args.size()) throw LispError("'else' must the last one.");
+        if (condition->asSymbol() == "else") {
+            if (num != args.size() - 1) throw LispError("'else' must the last one.");
             else if (list.size() <= 1) throw LispError("'else' must be followed by others.");
             else {
-                bool jump = 1;
                 for (int j = 1; j < list.size(); j++) {
                     if (j < list.size() - 1)
                         env.eval(list[j]);
@@ -133,9 +131,11 @@ ValuePtr condForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
                         return env.eval(list[list.size() - 1]);
                 }
             }
-        } else if (temp->asSymbol() == "#f") continue;
-        else {
-            if (list.size() == 1) return temp;
+        } else if (env.eval(condition)->asSymbol() == "#f") {
+            num++;
+            continue;
+        } else {
+            if (list.size() == 1) return env.eval(condition);
             for (int j = 1; j < list.size(); j++) {
                 if (j < list.size() - 1)
                     env.eval(list[j]);
@@ -178,7 +178,26 @@ ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     return temp.apply(value);
 };
 
+ValuePtr quasiquoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    if (args.size() == 1) return ValuePtr(new NilValue());
+    auto temporary = args[1]->toVector();
+    std::vector<ValuePtr> destination;
+    for (auto i : temporary) {
+        if (typeid(*i) != typeid(PairValue)) {
+            destination.push_back(i);
+        }else if (i->toVector()[0]->asSymbol().value() == "unquote") {
+            if (i->toVector().size() != 2)
+                throw LispError("'unquote' must be followed by others.");
+            std::vector<ValuePtr> temp = i->toVector()[1]->toVector();
+            destination.push_back(env.eval(my_list_make(temp)));
+        } else destination.push_back(i);
+    }
+    return my_list_make(destination);
+}
+
 const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS{
     {"define", (defineForm)}, {"quote", (quoteForm)}, {"if", ifForm},
     {"and", andForm},         {"or", orForm},         {"lambda", lambdaForm},
-    {"cond", condForm},       {"begin", beginForm},   {"let", letForm}};
+    {"cond", condForm},       {"begin", beginForm},
+    {"let", letForm},         {"let", letForm}, {"quasiquote", quasiquoteForm}
+};
