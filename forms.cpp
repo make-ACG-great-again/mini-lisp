@@ -109,6 +109,76 @@ ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     return std::make_shared<LambdaValue>(temp, temporary , env.shared_from_this());
 }
 
+ValuePtr condForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    if (args.size() <= 1) return ValuePtr(new NilValue);
+    int num = 0;
+    for (auto i : args) {
+        if (num == 0) {
+            num++;
+            continue;
+        }
+        std::vector<ValuePtr> list = i->toVector();
+        if (list.size() == 0) throw LispError("wrong num of arguments.");
+        auto condition = list[0];
+        auto temp = env.eval(condition);
+        if (temp->asSymbol() == "else") {
+            if (num != args.size()) throw LispError("'else' must the last one.");
+            else if (list.size() <= 1) throw LispError("'else' must be followed by others.");
+            else {
+                bool jump = 1;
+                for (int j = 1; j < list.size(); j++) {
+                    if (j < list.size() - 1)
+                        env.eval(list[j]);
+                    else
+                        return env.eval(list[list.size() - 1]);
+                }
+            }
+        } else if (temp->asSymbol() == "#f") continue;
+        else {
+            if (list.size() == 1) return temp;
+            for (int j = 1; j < list.size(); j++) {
+                if (j < list.size() - 1)
+                    env.eval(list[j]);
+                else
+                    return env.eval(list[list.size() - 1]);
+            }
+        }
+        num++;
+    };
+    return ValuePtr(new NilValue);
+};
+
+ValuePtr beginForm(const std::vector<ValuePtr>& args, EvalEnv& env){
+    if (args.size() <= 1) throw LispError("wrong num of arguments.");
+    for (int i = 1; i < args.size(); i++) {
+        if (i < args.size() - 1)
+            env.eval(args[i]);
+        else
+            return env.eval(args[i]);
+    };
+};
+
+ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    if (args.size() <= 2) throw LispError("wrong num of arguments.");
+    auto arguments = args[1]->toVector();
+    std::vector<std::string> argument;
+    std::vector<ValuePtr> value;
+    for (auto i : arguments) {
+        auto temp = i->toVector();
+        if (temp.size() != 2)
+            throw LispError("wrong num of arguments.");
+        else {
+            argument.push_back(temp[0]->toString());
+            value.push_back(temp[1]);
+        }
+    }
+    std::vector<ValuePtr> body;
+    body.insert(body.end(), args.begin() + 2, args.end());
+    LambdaValue temp = LambdaValue(argument, body, env.shared_from_this());
+    return temp.apply(value);
+};
+
 const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS{
     {"define", (defineForm)}, {"quote", (quoteForm)}, {"if", ifForm},
-    {"and", andForm},         {"or", orForm},         {"lambda", lambdaForm}};
+    {"and", andForm},         {"or", orForm},         {"lambda", lambdaForm},
+    {"cond", condForm},       {"begin", beginForm},   {"let", letForm}};

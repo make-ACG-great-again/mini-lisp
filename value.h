@@ -65,7 +65,7 @@ public:
 	std::string c;
 	StringValue(std::string s);
 	std::string toString()const;
-    std::optional<std::string> asSymbol();
+    //std::optional<std::string> asSymbol();
     bool operator==(std::shared_ptr<Value> temp);
 };
 
@@ -99,7 +99,7 @@ public:
 	std::string toString()const;
     static std::vector<std::shared_ptr<Value>> v;
     std::vector<std::shared_ptr<Value>> toVector();
-    std::optional<std::string> asSymbol();
+    //std::optional<std::string> asSymbol();
     ValuePtr left() const {
         ValuePtr temp = this->t1;
         return temp;

@@ -78,12 +78,12 @@ std::string StringValue::toString() const {
     return quotedStr;
 }
 
-std::optional<std::string> StringValue::asSymbol() {
-    std::ostringstream oss;
-    oss << std::quoted(c);
-    std::string quotedStr = oss.str();
-    return quotedStr;
-}
+//std::optional<std::string> StringValue::asSymbol() {
+//    std::ostringstream oss;
+//    oss << std::quoted(c);
+//    std::string quotedStr = oss.str();
+//    return quotedStr;
+//}
 
 bool StringValue::operator==(std::shared_ptr<Value> temp) {
     if (typeid(*temp) != typeid(StringValue)) {
@@ -197,10 +197,10 @@ std::vector<std::shared_ptr<Value>> PairValue::toVector() {
     return v;
 };
 
-std::optional<std::string> PairValue::asSymbol() {
-    std::optional<std::string> s = this->toString();
-    return s;
-}
+//std::optional<std::string> PairValue::asSymbol() {
+//    std::optional<std::string> s = this->toString();
+//    return s;
+//}
 
 bool PairValue::operator==(std::shared_ptr<Value> temp) {
     if (typeid(*temp) != typeid(PairValue)) {
