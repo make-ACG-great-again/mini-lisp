@@ -72,7 +72,7 @@ ValuePtr andForm(const std::vector<ValuePtr>& args, EvalEnv& env){
         return std::make_shared<BooleanValue>(true);
     }
     for (int i = 1; i < args.size(); i++) {
-        if (args[i]->toString() == "#f" || args[i]->toString() == "false") {
+        if (env.eval(args[i])->toString() == "#f" || env.eval(args[i])->toString() == "false") {
             return std::make_shared<BooleanValue>(false);
         } else {
             if (i == args.size() - 1) return env.eval(args[args.size() - 1]);
@@ -169,7 +169,7 @@ ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
             throw LispError("wrong num of arguments.");
         else {
             argument.push_back(temp[0]->toString());
-            value.push_back(temp[1]);
+            value.push_back(env.eval(temp[1]));
         }
     }
     std::vector<ValuePtr> body;

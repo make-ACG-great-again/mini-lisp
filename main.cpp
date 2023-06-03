@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 
 #include "./tokenizer.h"
 #include "./parser.h"
@@ -20,7 +21,7 @@ struct TestCtx {
     }
 };
 
-int main() {
+void REPL() {
     //RJSJ_TEST(TestCtx, Lv2, Lv2Only);
     //RJSJ_TEST(TestCtx, Lv2, Lv3);
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4);
@@ -28,7 +29,7 @@ int main() {
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv6);
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7);
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib);
-    RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
+    //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
     // [...]
     auto env = EvalEnv::createGlobal();  // 求值
     while (true) {
@@ -52,5 +53,37 @@ int main() {
         } catch (std::runtime_error& e) {
             std::cerr << "error: " << e.what() << std::endl;
         }
+    }
+}
+
+int text(std::ifstream& get_in) {
+    if (!get_in) {
+        std::cout << "Failed to open file." << std::endl;
+        return 1;
+    }
+    auto env = EvalEnv::createGlobal();
+    std::string line;
+    while (std::getline(get_in, line)) {
+        try {
+            auto tokens = Tokenizer::tokenize(line);
+            Parser parser(std::move(tokens));
+            auto value = parser.parse();
+            auto result = env->eval(std::move(value));
+        } catch (std::runtime_error& e) {
+            std::cerr << "error: " << e.what() << std::endl;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int main(int argc, char** argv) {
+    if (argc == 1) {
+        REPL();
+    } else if(argc == 2){
+        char* place = argv[1];
+        std::ifstream get(place, std::ios::in);
+        int reply = text(get);
+        return reply;
     }
 }
