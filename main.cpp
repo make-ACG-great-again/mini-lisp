@@ -65,6 +65,7 @@ int text(std::ifstream& get_in) {
     std::string line;
     while (std::getline(get_in, line)) {
         try {
+            if (line == "") continue;
             auto tokens = Tokenizer::tokenize(line);
             Parser parser(std::move(tokens));
             auto value = parser.parse();

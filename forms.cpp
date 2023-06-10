@@ -183,7 +183,7 @@ ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 };
 
 ValuePtr quasiquoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    if (args.size() == 1) return ValuePtr(new NilValue());
+    if (args.size() <= 1) return ValuePtr(new NilValue());
     auto temporary = args[1]->toVector();
     std::vector<ValuePtr> destination;
     for (auto i : temporary) {
