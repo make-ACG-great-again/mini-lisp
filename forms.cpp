@@ -8,6 +8,10 @@
 #include "./eval_env.h"
 
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    if (args.size() < 2) {
+        throw LispError("illegal define.");
+        return ValuePtr(new NilValue());
+    }
     std::optional<std::string> name = args[1]->asSymbol(); 
     if (typeid(*args[1]) == typeid(PairValue)) {
         std::vector<std::string> temp;

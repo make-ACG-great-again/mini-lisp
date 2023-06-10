@@ -190,7 +190,8 @@ std::vector<std::shared_ptr<Value>> PairValue::toVector() {
         t2->toVector();
     } else if (typeid(*t2) == typeid(NilValue)) {
     } else
-        v.push_back(t2);
+        throw LispError("wrong use of dot.");
+        //v.push_back(t2);
     if (tt) {
         out = 1;
         std::vector<std::shared_ptr<Value>> temp2 = PairValue::v;

@@ -1,0 +1,4 @@
+(define (sort-list lst) (if (null? lst) '() (let ((min (find-min lst))) (cons min (sort-list (remove-min lst min))))))
+(define (find-min lst) (if (null? (cdr lst)) (car lst) (let ((rest-min (find-min (cdr lst)))) (if (< (car lst) rest-min) (car lst)rest-min))))
+(define (remove-min lst min) (if (null? lst) '()(if (= (car lst) min)(cdr lst)(cons (car lst) (remove-min (cdr lst) min)))))
+(display (sort-list '(12 71 2 15 29 82 87 8 18 66 81 25 63 97 40 3 93 58 53 31 47)))

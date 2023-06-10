@@ -306,10 +306,13 @@ ValuePtr my_display(const std::vector<ValuePtr>& params){
 ValuePtr my_exit(const std::vector<ValuePtr>& params) {
     double n = 0;
     if (params.size() > 1) throw LispError("wrong num of arguments.");
-    if (params.size() == 1 && params[0]->isNumber()) {
-        n = params[0]->asNumber();
-    } else
-        throw LispError("Cannot exit with a non-numeric value.");
+    if (params.size() == 1)
+        if (params[0]->isNumber())
+            n = params[0]->asNumber();
+        else
+            throw LispError("Cannot exit with a non-numeric value.");
+    else
+        n = 0;
     std::cout << "Program terminated with exit(" << n << ')';
     std::exit(n);
 };
