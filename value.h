@@ -62,7 +62,8 @@ public:
 
 class StringValue : public Value {
 public:
-	std::string c;
+    std::string c;
+public:
 	StringValue(std::string s);
 	std::string toString()const;
     //std::optional<std::string> asSymbol();
@@ -74,6 +75,7 @@ public:
 	NilValue();
 	std::string toString()const;
     std::optional<std::string> asSymbol();
+    std::vector<std::shared_ptr<Value>> toVector();
     bool operator==(std::shared_ptr<Value> temp);
 };
 
@@ -93,11 +95,8 @@ class PairValue : public Value {
 	ValuePtr t1;
 	ValuePtr t2;
 public:
-	static bool kh;
-    static bool out;
 	PairValue(ValuePtr t11, ValuePtr t22);
 	std::string toString()const;
-    static std::vector<std::shared_ptr<Value>> v;
     std::vector<std::shared_ptr<Value>> toVector();
     //std::optional<std::string> asSymbol();
     ValuePtr left() const {
@@ -127,7 +126,6 @@ public:
 };
 
 class LambdaValue : public Value {
-private:
     std::vector<std::string> params;
     std::vector<ValuePtr> body;
     // [...]

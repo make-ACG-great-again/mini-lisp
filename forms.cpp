@@ -10,9 +10,9 @@
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     if (args.size() < 2) {
         throw LispError("illegal define.");
-        return ValuePtr(new NilValue());
+        return std::make_shared<NilValue>();
     }
-    std::optional<std::string> name = args[1]->asSymbol(); 
+    std::string name = args[1]->asSymbol().value(); 
     if (typeid(*args[1]) == typeid(PairValue)) {
         std::vector<std::string> temp;
         std::ranges::transform(args[1]->toVector(), std::back_inserter(temp),
@@ -22,28 +22,30 @@ ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
             std::copy(temp.begin() + 1, temp.end(), std::back_inserter(s));
         if (args.size() < 3) {
             throw LispError("illegal if.");
-            return ValuePtr(new NilValue());
+            return std::make_shared<NilValue>();
         }
         std::vector<ValuePtr> temporary;
         temporary.insert(temporary.end(), args.begin() + 2, args.end());
         env.defineBinding(temp[0], make_shared<LambdaValue>(s, temporary, env.shared_from_this()));
-        return ValuePtr(new NilValue());
+        return std::make_shared<NilValue>();
     }
     if (size(args) == 3) {
+        if (typeid(*args[1]) != typeid(SymbolValue))
+            throw LispError("illegal define.");
         auto tem = env.eval(args[2]);
         if (env.lookupBinding(tem) != nullptr) tem = env.lookupBinding(tem);
         //env.myMap.insert(std::make_pair(name , tem));
         // args.clear();
-        env.defineBinding(name.value(), tem);
-        return ValuePtr(new NilValue());
+        env.defineBinding(name, tem);
+        return std::make_shared<NilValue>();
     } else {
         throw LispError("illegal define.");
-        return ValuePtr(new NilValue());
+        return std::make_shared<NilValue>();
     }
 }
 
 ValuePtr quoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    if (args.size() == 1) return ValuePtr(new NilValue());
+    if (args.size() == 1) return ValuePtr(std::make_shared<NilValue>());
     if (args.size() == 2) return args[1];
     std::vector<ValuePtr> destination;
     std::copy(args.begin() + 1, args.end(),
@@ -56,13 +58,13 @@ ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     if (args.size() == 3) {
         if (env.eval(args[1])->toString() == "#f" ||
             env.eval(args[1])->toString() == "false") {
-            return ValuePtr(new NilValue());
+            return std::make_shared<NilValue>();
         } else
             return env.eval(args[2]);
     }
     if (args.size() != 4) {
         throw LispError("illegal if.");
-        return ValuePtr(new NilValue());
+        return std::make_shared<NilValue>();
     }
     if (env.eval(args[1])->toString() == "#f" ||
         env.eval(args[1])->toString() == "false") {
@@ -103,7 +105,7 @@ ValuePtr orForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     if (args.size() < 3) {
         throw LispError("illegal if.");
-        return ValuePtr(new NilValue());
+        return std::make_shared<NilValue>();
     }
     std::vector<ValuePtr> temporary;
     temporary.insert(temporary.end() , args.begin() + 2, args.end());
@@ -114,7 +116,7 @@ ValuePtr lambdaForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr condForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    if (args.size() <= 1) return ValuePtr(new NilValue);
+    if (args.size() <= 1) return std::make_shared<NilValue>();
     int num = 0;
     for (auto i : args) {
         if (num == 0) {
@@ -149,7 +151,7 @@ ValuePtr condForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
         }
         num++;
     };
-    return ValuePtr(new NilValue);
+    return std::make_shared<NilValue>();
 };
 
 ValuePtr beginForm(const std::vector<ValuePtr>& args, EvalEnv& env){
@@ -183,7 +185,7 @@ ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 };
 
 ValuePtr quasiquoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
-    if (args.size() <= 1) return ValuePtr(new NilValue());
+    if (args.size() <= 1) return std::make_shared<NilValue>();
     auto temporary = args[1]->toVector();
     std::vector<ValuePtr> destination;
     for (auto i : temporary) {

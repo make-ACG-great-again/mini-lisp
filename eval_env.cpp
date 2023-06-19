@@ -21,7 +21,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         return expr;
     } else if (typeid(*expr) == typeid(NilValue)) {
         throw LispError("Evaluating nil is prohibited.");
-        return ValuePtr(new NilValue());
+        return std::make_shared<NilValue>();
     } else if (typeid(*expr) == typeid(PairValue)) {
         std::vector<ValuePtr> v = expr->toVector();
         if (auto name = v[0]->asSymbol()){
@@ -50,7 +50,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
                 //    return value;
                 //} else {
                 //    throw LispError("Variable " + *name + " not defined.");
-                //    return ValuePtr(new NilValue());
+                //    return std::make_shared<NilValue>();
                 //}
             /*ValuePtr proc = this->eval(v[0]);
             const PairValue* tempptr =
@@ -60,7 +60,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
             return this->apply(proc, args);*/
         }else {
                 throw LispError("undefined operate.");
-                return ValuePtr(new NilValue());
+                return std::make_shared<NilValue>();
         }
     } else if (typeid(*expr) == typeid(SymbolValue)) {
         if(this->lookupBinding(expr)) return this->lookupBinding(expr);
@@ -71,7 +71,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         return expr;
     } else {
         throw LispError("Unimplemented");
-        return ValuePtr(new NilValue());
+        return std::make_shared<NilValue>();
     }
 }
 
@@ -98,8 +98,8 @@ ValuePtr EvalEnv::apply(ValuePtr proc, std::vector<ValuePtr> args) {
 }
 
 ValuePtr EvalEnv::lookupBinding(ValuePtr target) {
-    if (this->myMap.count(target->asSymbol()) > 0)
-        return this->myMap[target->asSymbol()];
+    if (this->myMap.count(target->asSymbol().value()) > 0)
+        return this->myMap[target->asSymbol().value()];
     else if (this->parent == nullptr) {
         return nullptr;
     } else return this->parent->lookupBinding(target);
@@ -108,8 +108,6 @@ ValuePtr EvalEnv::lookupBinding(ValuePtr target) {
 ValuePtr EvalEnv::defineBinding(std::string target, ValuePtr content){
     /*auto tem = this->eval(content);
     if (this->lookupBinding(tem) != nullptr) tem = this->lookupBinding(tem);*/
-    if (this->myMap.count(target) > 0)
-        this->myMap[target] = content;
-    else this->myMap.insert(std::make_pair(target, content));
-    return ValuePtr(new NilValue);
+    this->myMap[target] = content;
+    return std::make_shared<NilValue>();
 };

@@ -351,8 +351,8 @@ ValuePtr my_displayln(const std::vector<ValuePtr>& params){
     if (params.size() != 1)
         throw LispError("wrong num of arguments.");
     my_display(std::vector<ValuePtr>{params[0]});
-    my_newline(std::vector<ValuePtr>{(ValuePtr(new NilValue))});
-    return ValuePtr(new NilValue);
+    my_newline(std::vector<ValuePtr>{std::make_shared<NilValue>()});
+    return std::make_shared<NilValue>();
 };
 
 ValuePtr my_eval(const std::vector<ValuePtr>& params){
@@ -485,7 +485,7 @@ ValuePtr my_cdr(const std::vector<ValuePtr>& params) {
 
 ValuePtr my_cons(const std::vector<ValuePtr>& params) {
     if (params.size() != 2) throw LispError("wrong num of arguments.");
-    return ValuePtr(new PairValue(params[0], params[1]));
+    return std::make_shared<PairValue>(params[0], params[1]);
 };
 
 ValuePtr my_length(const std::vector<ValuePtr>& params) {
@@ -506,20 +506,20 @@ ValuePtr my_length(const std::vector<ValuePtr>& params) {
 };
 
 ValuePtr my_list_make(const std::vector<ValuePtr>& params) {
-    if (params.size() == 0) return ValuePtr(new NilValue);
+    if (params.size() == 0) return std::make_shared<NilValue>();
     int num = params.size();
-    ValuePtr temp = ValuePtr(new PairValue(params[num - 1], ValuePtr(new NilValue)));
+    ValuePtr temp = std::make_shared<PairValue>(params[num - 1], std::make_shared<NilValue>());
     if (params.size() == 1) return temp;
     ValuePtr temporary;
     for (int i = num - 2; i >= 0; i--) {
-        temporary = ValuePtr(new PairValue(params[i], temp));
+        temporary = std::make_shared<PairValue>(params[i], temp);
         temp = temporary;
     }
     return temp;
 };
 
 ValuePtr my_append(const std::vector<ValuePtr>& params) {
-    if (params.size() == 0) return ValuePtr(new NilValue);
+    if (params.size() == 0) return std::make_shared<NilValue>();
     int num = params.size();
     std::vector<ValuePtr> temp;
     for (int i = 0; i < num; i++) {
@@ -533,7 +533,7 @@ ValuePtr my_map(const std::vector<ValuePtr>& params){
     if (params.size() != 2) throw LispError("wrong num of arguments.");
     ValuePtr proc = params[0];
     ValuePtr list = params[1];
-    if (typeid(*list) == typeid(NilValue)) return ValuePtr(new NilValue);
+    if (typeid(*list) == typeid(NilValue)) return std::make_shared<NilValue>();
     if (typeid(*list) != typeid(PairValue))
         throw LispError("wrong type of list.");
     std::vector<ValuePtr> lists = list->toVector();
@@ -558,7 +558,7 @@ ValuePtr my_filter(const std::vector<ValuePtr>& params) {
     if (params.size() != 2) throw LispError("wrong num of arguments.");
     ValuePtr proc = params[0];
     ValuePtr list = params[1];
-    if (typeid(*list) == typeid(NilValue)) return ValuePtr(new NilValue);
+    if (typeid(*list) == typeid(NilValue)) return std::make_shared<NilValue>();
     if (typeid(*list) != typeid(PairValue))
         throw LispError("wrong type of list.");
     std::vector<ValuePtr> lists = list->toVector();

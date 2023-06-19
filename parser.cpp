@@ -56,7 +56,7 @@ ValuePtr Parser::parseTails() {
     }
     if ((*tokens.begin())->getType() == TokenType::RIGHT_PAREN) {
         tokens.pop_front();
-        return ValuePtr(new NilValue);
+        return std::make_shared<NilValue>();
     }
     auto car = this->parse();
     if ((*tokens.begin())->getType() == TokenType::DOT) {
@@ -72,13 +72,13 @@ ValuePtr Parser::parseTails() {
             throw SyntaxError("Unimplemented_unexpexcted");
             return nullptr;
         }
-        return ValuePtr(new PairValue(car, cdr));
+        return std::make_shared<PairValue>(car, cdr);
     } else {
         auto cdr = this->parseTails();
         if (cdr == nullptr) {
             throw SyntaxError("Unimplemented_wrong");
             return nullptr;
         }
-        return ValuePtr(new PairValue(car, cdr));
+        return std::make_shared<PairValue>(car, cdr);
     }
 }

@@ -23,7 +23,7 @@ public:
     };
     static std::vector<std::shared_ptr<EvalEnv>> eval_environment;
     std::shared_ptr<EvalEnv> parent;
-    std::unordered_map<std::optional<std::string>, ValuePtr> myMap;
+    std::unordered_map<std::string, ValuePtr> myMap;
     ValuePtr eval(ValuePtr expr);
     std::vector<ValuePtr> evalList(ValuePtr expr);
     ValuePtr apply(ValuePtr proc, std::vector<ValuePtr> args);

@@ -105,6 +105,11 @@ std::optional<std::string> NilValue::asSymbol() {
     return std::string{"()"};
 }
 
+std::vector<std::shared_ptr<Value>> NilValue::toVector() {
+    std::vector<std::shared_ptr<Value>> temp{};
+    return temp;
+};
+
 bool NilValue::operator==(std::shared_ptr<Value> temp) {
     if (typeid(*temp) != typeid(NilValue)) {
         return false;
@@ -138,67 +143,98 @@ bool SymbolValue::operator==(std::shared_ptr<Value> temp) {
         return false;
 };
 
-bool PairValue::kh = 1;
-bool PairValue::out = 1;
-std::vector<std::shared_ptr<Value>> PairValue::v = {};
-
 PairValue::PairValue(ValuePtr t11, ValuePtr t22) : t1{ t11 }, t2{ t22 } {};
+
+std::string unpack(std::shared_ptr<PairValue> item){
+    std::string s1 = item->left()->toString();
+    // std::string s2 = t2->toString();
+    std::string s2;
+    Value* temp = &*(item->right());
+    if (auto pair = dynamic_cast<const PairValue*>(temp)) {
+        s2 = ' ' + unpack(std::make_shared<PairValue>(*pair));
+        return std::string{s1 + s2};
+    };
+    if (auto pair = dynamic_cast<const NilValue*>(temp)) {
+        return std::string{s1};
+    } else {
+        s2 = " . " + item->right()->toString();
+    }
+    return std::string{s1 + s2};
+};
+
 std::string PairValue::toString() const {
-    bool t = kh;
-    kh = 1;
-	std::string s1 = t1->toString();
-    kh = t;
-	//std::string s2 = t2->toString();
-	std::string s2;
-	Value* temp = &*t2;
-	bool temp_kh = kh;
-	kh = 0;
-	if (auto pair = dynamic_cast<const PairValue*>(temp)) {
-		s2 = ' ' + pair->toString();
-		if (temp_kh) {
-			kh = 1;
-			return std::string{ '(' + s1 + s2 + ')' };
-		}
-		else return std::string{ s1 + s2 };
-	};
-	if (auto pair = dynamic_cast<const NilValue*>(temp)) {
-		if (temp_kh) {
-			kh = 1;
-			return std::string{ '(' + s1 + ')' };
-		}
-		else return std::string{ s1 };
-	}
-	else { s2 = " . " + t2->toString(); }
-	if (temp_kh) {
-		kh = 1;
-		return std::string{ '(' + s1 + s2 + ')' };
-	}
-	else return std::string{ s1 + s2 };
+    // bool t = kh;
+    // kh = 1;
+    // std::string s1 = t1->toString();
+    // kh = t;
+    ////std::string s2 = t2->toString();
+    // std::string s2;
+    // Value* temp = &*t2;
+    // bool temp_kh = kh;
+    // kh = 0;
+    // if (auto pair = dynamic_cast<const PairValue*>(temp)) {
+    //	s2 = ' ' + pair->toString();
+    //	if (temp_kh) {
+    //		kh = 1;
+    //		return std::string{ '(' + s1 + s2 + ')' };
+    //	}
+    //	else return std::string{ s1 + s2 };
+    //};
+    // if (auto pair = dynamic_cast<const NilValue*>(temp)) {
+    //	if (temp_kh) {
+    //		kh = 1;
+    //		return std::string{ '(' + s1 + ')' };
+    //	}
+    //	else return std::string{ s1 };
+    //}
+    // else { s2 = " . " + t2->toString(); }
+    // if (temp_kh) {
+    //	kh = 1;
+    //	return std::string{ '(' + s1 + s2 + ')' };
+    //}
+    // else return std::string{ s1 + s2 };
+    return std::string{'(' + unpack(std::make_shared<PairValue>(*this)) + ')'};
+}
+
+std::vector<std::shared_ptr<Value>> flatten(std::shared_ptr<PairValue> item){
+    std::vector<std::shared_ptr<Value>> outcome{};
+    if (typeid(*item->left()) == typeid(NilValue)) {
+    } else
+        outcome.push_back(item->left());
+    if (typeid(*item->right()) == typeid(PairValue)) {
+        std::vector<std::shared_ptr<Value>> temp =
+            flatten(std::make_shared<PairValue>(*static_cast<const PairValue*>(&*item->right())));
+        std::copy(temp.begin(), temp.end(), std::back_inserter(outcome));
+    } else if (typeid(*item->right()) == typeid(NilValue)) {
+    } else
+        throw LispError("wrong use of dot.");
+    return outcome;
 }
 
 std::vector<std::shared_ptr<Value>> PairValue::toVector() {
-    bool tt = out;
-    //if (typeid(*t1) == typeid(PairValue)) {
-    //    //v.push_back();
-    //} else 
-    if (typeid(*t1) == typeid(NilValue)) {
-        
-    } else
-        v.push_back(t1);
-    if (typeid(*t2) == typeid(PairValue)) {
-        out = 0;
-        t2->toVector();
-    } else if (typeid(*t2) == typeid(NilValue)) {
-    } else
-        throw LispError("wrong use of dot.");
-        //v.push_back(t2);
-    if (tt) {
-        out = 1;
-        std::vector<std::shared_ptr<Value>> temp2 = PairValue::v;
-        v.clear();
-        return temp2;
-    }
-    return v;
+    // bool tt = out;
+    ////if (typeid(*t1) == typeid(PairValue)) {
+    ////    //v.push_back();
+    ////} else
+    // if (typeid(*t1) == typeid(NilValue)) {
+    //
+    // } else
+    //     v.push_back(t1);
+    // if (typeid(*t2) == typeid(PairValue)) {
+    //     out = 0;
+    //     t2->toVector();
+    // } else if (typeid(*t2) == typeid(NilValue)) {
+    // } else
+    //     throw LispError("wrong use of dot.");
+    //     //v.push_back(t2);
+    // if (tt) {
+    //     out = 1;
+    //     std::vector<std::shared_ptr<Value>> temp2 = PairValue::v;
+    //     v.clear();
+    //     return temp2;
+    // }
+    // return v;
+    return flatten(std::make_shared<PairValue>(*this));
 };
 
 //std::optional<std::string> PairValue::asSymbol() {
