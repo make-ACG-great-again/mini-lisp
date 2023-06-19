@@ -36,6 +36,7 @@ void REPL() {
     while (true) {
         try {
             if (!Parser::uncomplete) {
+                Parser::unprocessed.clear();
                 std::cout << ">>> ";
                 std::string line;
                 std::getline(std::cin, line);
@@ -62,18 +63,25 @@ void REPL() {
                     std::exit(0);
                 }
                 auto tokens = Tokenizer::tokenize(line);
-                Parser parser(std::move(tokens));
+                //Parser::unprocessed.insert(Parser::unprocessed.end(), tokens.begin(), tokens.end());
+                while (!tokens.empty()) {
+                    Parser::unprocessed.push_back(std::move(tokens.front()));
+                    tokens.pop_front();
+                }
+                Parser parser(std::move(Parser::unprocessed));
+                Parser::unprocessed.clear();
                 auto value = parser.parse();
                 auto result = env->eval(std::move(value)); 
                 std::cout << result->toString() << std::endl;
                 Parser::uncomplete = 0;
+                Parser::unprocessed.clear();
             }
         } catch (uncomplete_error& c) {
             Parser::uncomplete = 1;
-            continue;
         } catch (std::runtime_error& e) {
             std::cerr << "error: " << e.what() << std::endl;
             Parser::uncomplete = 0;
+            Parser::unprocessed.clear();
         }
     }
 }
@@ -85,14 +93,33 @@ int text(std::ifstream& get_in) {
     }
     auto env = EvalEnv::createGlobal();
     std::string line;
+    Parser::uncomplete = 0;
     while (std::getline(get_in, line)) {
         try {
             if (line == "") continue;
             if (line[0] == ';' && line[1] == ';') continue;
-            auto tokens = Tokenizer::tokenize(line);
-            Parser parser(std::move(tokens));
-            auto value = parser.parse();
-            auto result = env->eval(std::move(value));
+            if (!Parser::uncomplete) {
+                Parser::unprocessed.clear();
+                auto tokens = Tokenizer::tokenize(line);
+                Parser parser(std::move(tokens));
+                auto value = parser.parse();
+                auto result = env->eval(std::move(value));
+                Parser::uncomplete = 0;
+            } else {
+                auto tokens = Tokenizer::tokenize(line);
+                while (!tokens.empty()) {
+                    Parser::unprocessed.push_back(std::move(tokens.front()));
+                    tokens.pop_front();
+                }
+                Parser parser(std::move(Parser::unprocessed));
+                Parser::unprocessed.clear();
+                auto value = parser.parse();
+                auto result = env->eval(std::move(value));
+                Parser::uncomplete = 0;
+                Parser::unprocessed.clear();
+            }
+        } catch (uncomplete_error& c) {
+            Parser::uncomplete = 1;
         } catch (std::runtime_error& e) {
             std::cerr << "error: " << e.what() << std::endl;
             return 1;

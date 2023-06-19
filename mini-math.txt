@@ -51,7 +51,7 @@
             true
             (if (zero? (remainder n i))
                 false
-                (loop (+ i 1))))))
+                (loop (+ i 1)))))))
 
 ;; 将角度转换为弧度
 (define (degrees->radians degrees)

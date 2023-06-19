@@ -74,7 +74,8 @@ TokenPtr Tokenizer::nextToken(int& pos) {
 }
 
 std::deque<TokenPtr> Tokenizer::tokenize() {
-    std::deque<TokenPtr> tokens;
+    std::deque<TokenPtr> tokens{};
+    tokens.clear();
     int pos = 0;
     while (true) {
         auto token = nextToken(pos);

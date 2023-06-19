@@ -227,15 +227,36 @@ ValuePtr importForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     while (std::getline(get_in, line_T)) {
         try {
             if (line_T == "") continue;
-            if (line_T[0] == ';' && line_T[1] == ';') continue;
-            auto tokens_T = Tokenizer::tokenize(line_T);
-            Parser parser_T(std::move(tokens_T));
-            auto value_T = parser_T.parse();
-            auto result_T = env.eval(std::move(value_T));
+            if (line_T[0] == ';' && line_T[1] == ';') 
+                continue;
+            if (!Parser::uncomplete) {
+                Parser::unprocessed.clear();
+                auto tokens = Tokenizer::tokenize(line_T);
+                Parser parser(std::move(tokens));
+                auto value = parser.parse();
+                auto result = env.eval(std::move(value));
+                Parser::uncomplete = 0;
+            } else {
+                auto tokens = Tokenizer::tokenize(line_T);
+                while (!tokens.empty()) {
+                    Parser::unprocessed.push_back(std::move(tokens.front()));
+                    tokens.pop_front();
+                }
+                Parser parser(std::move(Parser::unprocessed));
+                Parser::unprocessed.clear();
+                auto value = parser.parse();
+                auto result = env.eval(std::move(value));
+                Parser::uncomplete = 0;
+                Parser::unprocessed.clear();
+            }
+        } catch (uncomplete_error& c) {
+            Parser::uncomplete = 1;
         } catch (std::runtime_error& e) {
+            std::cout << "wrong" << std::endl;
             throw LispError("failed while import.");
         }
     }
+    if (Parser::uncomplete) throw LispError("failed while import.");
     return std::make_shared<NilValue>();
 }
 
