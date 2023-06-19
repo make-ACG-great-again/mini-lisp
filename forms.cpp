@@ -1,8 +1,15 @@
-#include<typeinfo>
-#include<iostream>
-#include<unordered_map>
+#include <typeinfo>
+#include <iostream>
+#include <unordered_map>
 #include <algorithm>
 #include <iterator>
+#include <fstream>
+
+#include "./tokenizer.h"
+#include "./parser.h"
+#include "./eval_env.h"
+#include "./builtins.h"
+#include "./value.h"
 #include "./forms.h"
 #include "./error.h"
 #include "./eval_env.h"
@@ -201,9 +208,39 @@ ValuePtr quasiquoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     return my_list_make(destination);
 }
 
+ValuePtr importForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    if (args.size() != 2) throw LispError("illegal import.");
+    std::string place = args[1]->toString();
+    if (place.length() <= 2) {
+        throw LispError("illegal import.");
+    }
+    std::string address = {"C:\\Users\\LCM\\Desktop\\import\\"};
+    std::string source = args[1]->toString();
+    address.append(source.substr(1, source.length() - 2));
+    address.append(".txt");
+    //std::cout << address << std::endl;
+    std::ifstream get_in(address, std::ios::in);
+    if (!get_in) {
+        throw LispError("unfound.");
+    }
+    std::string line_T;
+    while (std::getline(get_in, line_T)) {
+        try {
+            if (line_T == "") continue;
+            if (line_T[0] == ';' && line_T[1] == ';') continue;
+            auto tokens_T = Tokenizer::tokenize(line_T);
+            Parser parser_T(std::move(tokens_T));
+            auto value_T = parser_T.parse();
+            auto result_T = env.eval(std::move(value_T));
+        } catch (std::runtime_error& e) {
+            throw LispError("failed while import.");
+        }
+    }
+    return std::make_shared<NilValue>();
+}
+
 const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS{
     {"define", (defineForm)}, {"quote", (quoteForm)}, {"if", ifForm},
     {"and", andForm},         {"or", orForm},         {"lambda", lambdaForm},
-    {"cond", condForm},       {"begin", beginForm},
-    {"let", letForm},         {"let", letForm}, {"quasiquote", quasiquoteForm}
-};
+    {"cond", condForm},       {"begin", beginForm}, {"let", letForm},
+    {"quasiquote", quasiquoteForm}, {"import", importForm}};

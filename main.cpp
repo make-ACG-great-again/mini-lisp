@@ -32,26 +32,48 @@ void REPL() {
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
     // [...]
     auto env = EvalEnv::createGlobal();  // 求值
+    Parser::uncomplete = 0;
     while (true) {
         try {
-            std::cout << ">>> ";
-            std::string line;
-            std::getline(std::cin, line);
-            if (std::cin.eof()) {
-                std::exit(0);
+            if (!Parser::uncomplete) {
+                std::cout << ">>> ";
+                std::string line;
+                std::getline(std::cin, line);
+                if (std::cin.eof()) {
+                    std::exit(0);
+                }
+                auto tokens = Tokenizer::tokenize(line);
+                // for (auto& token : tokens) { //词法分析器
+                //     std::cout << *token << std::endl; //词法分析器
+                // } //词法分析器
+                Parser parser(std::move(tokens));  // tokenptr 不支持复制
+                auto value = parser.parse();
+                // std::cout << value->toString() << std::endl;  // 输出外部表示
+                // //语法分析
+                auto result = env->eval(std::move(value));  // 求值
+                // if (result == nullptr) std::cout << "error" << std::endl;
+                std::cout << result->toString() << std::endl;  // 求值
+                Parser::uncomplete = 0;
+            } else {
+                std::cout << "...";
+                std::string line;
+                std::getline(std::cin, line);
+                if (std::cin.eof()) {
+                    std::exit(0);
+                }
+                auto tokens = Tokenizer::tokenize(line);
+                Parser parser(std::move(tokens));
+                auto value = parser.parse();
+                auto result = env->eval(std::move(value)); 
+                std::cout << result->toString() << std::endl;
+                Parser::uncomplete = 0;
             }
-            auto tokens = Tokenizer::tokenize(line);
-            //for (auto& token : tokens) { //词法分析器
-            //    std::cout << *token << std::endl; //词法分析器
-            //} //词法分析器
-            Parser parser(std::move(tokens));  // tokenptr 不支持复制
-            auto value = parser.parse();
-            //std::cout << value->toString() << std::endl;  // 输出外部表示   //语法分析
-            auto result = env->eval(std::move(value)); //求值
-            //if (result == nullptr) std::cout << "error" << std::endl;
-            std::cout << result->toString() << std::endl; //求值
+        } catch (uncomplete_error& c) {
+            Parser::uncomplete = 1;
+            continue;
         } catch (std::runtime_error& e) {
             std::cerr << "error: " << e.what() << std::endl;
+            Parser::uncomplete = 0;
         }
     }
 }
@@ -66,6 +88,7 @@ int text(std::ifstream& get_in) {
     while (std::getline(get_in, line)) {
         try {
             if (line == "") continue;
+            if (line[0] == ';' && line[1] == ';') continue;
             auto tokens = Tokenizer::tokenize(line);
             Parser parser(std::move(tokens));
             auto value = parser.parse();

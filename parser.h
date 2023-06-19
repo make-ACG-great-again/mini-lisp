@@ -8,6 +8,8 @@
 
 class Parser {
 public:
+    static bool uncomplete;
+    static std::deque<TokenPtr> unprocessed;
     std::deque<TokenPtr> tokens;
     Parser(std::deque<TokenPtr> tokens);
     ValuePtr parse();

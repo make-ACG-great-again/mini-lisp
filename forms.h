@@ -24,5 +24,6 @@ ValuePtr condForm(const std::vector<ValuePtr>& args, EvalEnv& env);
 ValuePtr beginForm(const std::vector<ValuePtr>& args, EvalEnv& env);
 ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env);
 ValuePtr quasiquoteForm(const std::vector<ValuePtr>& args, EvalEnv& env);
+ValuePtr importForm(const std::vector<ValuePtr>& args, EvalEnv& env);
 
 #endif
