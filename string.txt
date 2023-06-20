@@ -1,0 +1,23 @@
+;; 函数：(drop n lst)
+;; 描述：从列表中删除前 n 个元素，并返回剩余的列表
+(define (drop n lst)
+  (if (or (null? lst) (= n 0))
+      lst
+      (drop (- n 1) (cdr lst))))
+
+;; 函数：(take n lst)
+;; 描述：从列表中获取前 n 个元素，并返回一个新的列表
+(define (take n lst)
+  (if (or (null? lst) (= n 0))
+      '()
+      (cons (car lst) (take (- n 1) (cdr lst)))))
+
+;; 函数：(string-ref str index)(substring
+;; 描述：获取字符串指定索引位置的字符
+(define (string-ref str index)
+  (car (drop index str)))
+
+;; 函数：(substring str start end)
+;; 描述：从字符串中截取子串
+(define (substring str start end)
+  (take (- end start) (drop start str)))

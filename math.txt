@@ -1,0 +1,136 @@
+;; math.lisp
+
+;; 定义常量 PI
+(define pi 3.141592653589793)
+
+;; 计算平方根
+(define (sqrt x) (let ((guess 1.0)) (define (improve guess) (average guess (/ x guess))) (define (good-enough? guess) (< (abs (- (square guess) x)) 0.0001)) (define (sqrt-iter guess) (if (good-enough? guess) guess (sqrt-iter (improve guess)))) (sqrt-iter guess)))
+
+;; 计算平方
+(define (square x) (* x x))
+
+;; 计算平均值
+(define (average x y) (/ (+ x y) 2))
+
+;; 计算阶乘
+(define (factorial n) (if (<= n 1) 1 (* n (factorial (- n 1)))))
+
+;; 计算组合数
+(define (combination n k) (/ (factorial n) (* (factorial k) (factorial (- n k)))))
+
+;; 计算阶乘序列
+(define (factorial-sequence n) (let ((result '())) (define (factorial-helper i) (if (> i n) result (begin (set! result (cons (factorial i) result)) (factorial-helper (+ i 1))))) (factorial-helper 1)))
+
+;; 计算斐波那契数列
+(define (fibonacci n) (if (< n 2) n (+ (fibonacci (- n 1)) (fibonacci (- n 2)))))
+
+;; 计算指定数字的阶乘
+(define (factorial n)
+  (if (< n 0)
+      (error "Factorial is not defined for negative numbers")
+      (if (= n 0)
+          1
+          (* n (factorial (- n 1))))))
+
+;; 计算两个数的最大公约数
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+
+;; 计算两个数的最小公倍数
+(define (lcm a b)
+  (/ (* a b) (gcd a b)))
+
+;; 判断一个数是否为质数
+(define (prime? n)
+  (if (< n 2)
+      false
+      (let loop ((i 2))
+        (if (> (* i i) n)
+            true
+            (if (zero? (remainder n i))
+                false
+                (loop (+ i 1)))))))
+
+;; 将角度转换为弧度
+(define (degrees->radians degrees)
+  (* (/ degrees 180) pi))
+
+;; 将弧度转换为角度
+(define (radians->degrees radians)
+  (* (/ radians pi) 180))
+
+;; 计算平方根
+(define (sqrt x)
+  (if (< x 0)
+      (error "Square root is not defined for negative numbers")
+      (let loop ((guess 1.0))
+        (if (close-enough? guess (improve guess))
+            guess
+            (loop (improve guess))))))
+
+;; 判断两个数是否近似相等
+(define (close-enough? x y)
+  (< (abs (- x y)) 0.0001))
+
+;; 改进平方根的猜测值
+(define (improve guess x)
+  (average guess (/ x guess)))
+
+;; 计算指定范围内的所有数字的和
+(define (sum-range start end)
+  (if (> start end)
+      0
+      (+ start (sum-range (+ start 1) end))))
+
+;; 计算斐波那契数列的第n个数
+(define (fibonacci n)
+  (if (< n 2)
+      n
+      (+ (fibonacci (- n 1)) (fibonacci (- n 2)))))
+
+;; 计算n的阶乘的递归版本
+(define (factorial n)
+  (if (< n 0)
+      (error "Factorial is not defined for negative numbers")
+      (if (= n 0)
+          1
+          (* n (factorial (- n 1))))))
+
+;; 计算n的阶乘的迭代版本
+(define (factorial-iter n)
+  (define (iter product counter max)
+    (if (> counter max)
+        product
+        (iter (* product counter) (+ counter 1) max)))
+  (iter 1 1 n))
+
+;; 计算斐波那契数列的第n个数的迭代版本
+(define (fibonacci-iter n)
+  (define (iter a b counter max)
+    (if (= counter max)
+        a
+        (iter b (+ a b) (+ counter 1) max)))
+  (if (< n 2)
+      n
+      (iter 0 1 2 n)))
+
+;; 计算n的阶乘的尾递归版本
+(define (factorial-tail n)
+  (define (fact n acc)
+    (if (< n 2)
+        acc
+        (fact (- n 1) (* n acc))))
+  (fact n 1))
+
+;; 计算斐波那契数列的第n个数的尾递归版本
+(define (fibonacci-tail n)
+  (define (fib n a b)
+    (if (= n 0)
+        a
+        (fib (- n 1) b (+ a b))))
+  (if (< n 2)
+      n
+      (fib (- n 2) 0 1)))
+

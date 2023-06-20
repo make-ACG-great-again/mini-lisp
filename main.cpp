@@ -48,12 +48,15 @@ void REPL() {
                 //     std::cout << *token << std::endl; //词法分析器
                 // } //词法分析器
                 Parser parser(std::move(tokens));  // tokenptr 不支持复制
-                auto value = parser.parse();
-                // std::cout << value->toString() << std::endl;  // 输出外部表示
-                // //语法分析
-                auto result = env->eval(std::move(value));  // 求值
-                // if (result == nullptr) std::cout << "error" << std::endl;
-                std::cout << result->toString() << std::endl;  // 求值
+                while (!parser.tokens.empty()) {
+                    auto value = parser.parse();
+                    // std::cout << value->toString() << std::endl;  //
+                    // 输出外部表示
+                    // //语法分析
+                    auto result = env->eval(std::move(value));  // 求值
+                    // if (result == nullptr) std::cout << "error" << std::endl;
+                    std::cout << result->toString() << std::endl;  // 求值
+                }
                 Parser::uncomplete = 0;
             } else {
                 std::cout << "...";
@@ -70,9 +73,11 @@ void REPL() {
                 }
                 Parser parser(std::move(Parser::unprocessed));
                 Parser::unprocessed.clear();
-                auto value = parser.parse();
-                auto result = env->eval(std::move(value)); 
-                std::cout << result->toString() << std::endl;
+                while (!parser.tokens.empty()) {
+                    auto value = parser.parse();
+                    auto result = env->eval(std::move(value));
+                    std::cout << result->toString() << std::endl;
+                }
                 Parser::uncomplete = 0;
                 Parser::unprocessed.clear();
             }
@@ -102,8 +107,10 @@ int text(std::ifstream& get_in) {
                 Parser::unprocessed.clear();
                 auto tokens = Tokenizer::tokenize(line);
                 Parser parser(std::move(tokens));
-                auto value = parser.parse();
-                auto result = env->eval(std::move(value));
+                while (!parser.tokens.empty()) {
+                    auto value = parser.parse();
+                    auto result = env->eval(std::move(value));
+                }
                 Parser::uncomplete = 0;
             } else {
                 auto tokens = Tokenizer::tokenize(line);
@@ -113,8 +120,10 @@ int text(std::ifstream& get_in) {
                 }
                 Parser parser(std::move(Parser::unprocessed));
                 Parser::unprocessed.clear();
-                auto value = parser.parse();
-                auto result = env->eval(std::move(value));
+                while (!parser.tokens.empty()) {
+                    auto value = parser.parse();
+                    auto result = env->eval(std::move(value));
+                }
                 Parser::uncomplete = 0;
                 Parser::unprocessed.clear();
             }
