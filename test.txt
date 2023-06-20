@@ -1,1 +1,7 @@
-(print 1) (print 2)
+(print 0) ~(print "do not print me")~ (print 0.5)
+(print 1) (print 2) ~(print "do not print me")
+(print "do not print me")
+(print "do not print me")~ (print 3)
+(print 4) (print ~(print "do not print me")~ 5)
+(print~(print "do not print me")
+~6)

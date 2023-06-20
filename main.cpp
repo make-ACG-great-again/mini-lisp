@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+//#include <conio.h>
 
 #include "./tokenizer.h"
 #include "./parser.h"
@@ -9,6 +10,12 @@
 #include "./builtins.h"
 #include "./value.h"
 #include "./rjsj_test.hpp"
+//#include "./PDCurses-3.9/PDCurses-3.9/curses.h";
+//
+//#ifdef _WIN32
+//#define NOMINMAX
+//#include <Windows.h>
+//#endif
 
 struct TestCtx {
     //EvalEnv env;
@@ -22,6 +29,51 @@ struct TestCtx {
     }
 };
 
+std::vector<std::string::iterator> findAllOccurrences(std::string& str, char ch) {
+    std::vector<std::string::iterator> occurrences;
+    auto it = std::find(str.begin(), str.end(), ch);
+    while (it != str.end()) {
+        occurrences.push_back(it);
+        it = std::find_if(std::next(it), str.end(),
+                          [ch](char c) { return c == ch; });
+    }
+    //std::cout << "find" << std::endl;
+    return occurrences;
+}
+
+//std::string getline() {
+//    std::string input;
+//    char ch;
+//    std::string temp;
+//    std::vector<char> cut_off{'(', ')', '\'', '`', ',', ';', '\n'};
+//    while (true) {
+//        // 检查是否有键盘输入
+//        if (_kbhit()) {
+//            // 获取键盘输入
+//            ch = _getch();
+//            if (std::find(cut_off.begin(), cut_off.end(), ch) != cut_off.end()) {
+//                auto temp_env = EvalEnv::createGlobal();
+//                auto temp_Val = std::make_shared<StringValue>(temp);
+//                if (temp_env->lookupBinding(temp_Val) && !temp.empty()) {
+//                    for (int i = 0; i < temp.size(); i++) {
+//                        std::cout << '\b';
+//                    }
+//                    std::cout << "\033[33m" << temp << "\033[0m";
+//                }
+//            }
+//            if (ch == '\n') {
+//                std::cout << std::endl;
+//                return input;
+//            }
+//            std::cout << ch; 
+//            input += ch;
+//        }
+//
+//        // 处理其他逻辑
+//        // ...
+//    }
+//}
+
 void REPL() {
     //RJSJ_TEST(TestCtx, Lv2, Lv2Only);
     //RJSJ_TEST(TestCtx, Lv2, Lv3);
@@ -32,7 +84,7 @@ void REPL() {
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib);
     //RJSJ_TEST(TestCtx, Lv2, Lv3, Lv4, Lv5, Lv5Extra, Lv6, Lv7, Lv7Lib, Sicp);
     // [...]
-    auto env = EvalEnv::createGlobal();  // 求值
+    static auto env_s = EvalEnv::createGlobal();  // 求值
     Parser::uncomplete = 0;
     std::deque<ValuePtr> parsers_REPL{};
     while (true) {
@@ -62,7 +114,7 @@ void REPL() {
                 while (!parsers_REPL.empty()) {
                     ValuePtr value = std::move(parsers_REPL.front());
                     parsers_REPL.pop_front();
-                    auto result = env->eval(std::move(value));  // 求值
+                    auto result = env_s->eval(std::move(value));  // 求值
                     // if (result == nullptr) std::cout << "error" << std::endl;
                     std::cout << result->toString() << std::endl;  // 求值
                 }
@@ -91,7 +143,7 @@ void REPL() {
                 while (!parsers_REPL.empty()) {
                     ValuePtr value = std::move(parsers_REPL.front());
                     parsers_REPL.pop_front();
-                    auto result = env->eval(std::move(value));
+                    auto result = env_s->eval(std::move(value));
                     std::cout << result->toString() << std::endl;
                 }
                 Parser::uncomplete = 0;
@@ -120,6 +172,27 @@ int text(std::ifstream& get_in) {
         try {
             if (line == "") continue;
             if (line[0] == ';' && line[1] == ';') continue;
+            std::vector<std::string::iterator> temp = findAllOccurrences(line, '~');
+            while (temp.size() % 2 != 0) {
+                //std::cout << temp.size() << std::endl;
+                std::string moreline;
+                if (!std::getline(get_in, moreline))
+                    throw LispError("unclosed ~");
+                line += moreline;
+                //std::cout << "moreline" << std::endl;
+                temp = findAllOccurrences(line, '~');
+            }
+            if (temp.size() > 0) {
+                int n = 0;
+                while (n < temp.size()) {
+                    auto head = temp[n];
+                    n++;
+                    auto tail = temp[n];
+                    n++;
+                    line.erase(head, tail);
+                    *head = ' ';
+                }
+            }
             if (!Parser::uncomplete) {
                 Parser::unprocessed.clear();
                 auto tokens = Tokenizer::tokenize(line);
@@ -169,6 +242,7 @@ int text(std::ifstream& get_in) {
 }
 
 int main(int argc, char** argv) {
+    //SetConsoleOutputCP(CP_UTF8);
     if (argc == 1) {
         REPL();
     } else if(argc == 2){
