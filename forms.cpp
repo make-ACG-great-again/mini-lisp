@@ -63,8 +63,8 @@ ValuePtr quoteForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 
 ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
     if (args.size() == 3) {
-        if (env.eval(args[1])->toString() == "#f" ||
-            env.eval(args[1])->toString() == "false") {
+        auto temp = env.eval(args[1]);
+        if (temp->toString() == "#f" || temp->toString() == "false") {
             return std::make_shared<NilValue>();
         } else
             return env.eval(args[2]);
@@ -73,8 +73,8 @@ ValuePtr ifForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
         throw LispError("illegal if.");
         return std::make_shared<NilValue>();
     }
-    if (env.eval(args[1])->toString() == "#f" ||
-        env.eval(args[1])->toString() == "false") {
+    auto temp = env.eval(args[1]);
+    if (temp->toString() == "#f" || temp->toString() == "false") {
         return env.eval(args[3]);
     } else
         return env.eval(args[2]);
@@ -85,12 +85,14 @@ ValuePtr andForm(const std::vector<ValuePtr>& args, EvalEnv& env){
         return std::make_shared<BooleanValue>(true);
     }
     for (int i = 1; i < args.size(); i++) {
-        if (env.eval(args[i])->toString() == "#f" || env.eval(args[i])->toString() == "false") {
+        auto temp = env.eval(args[i]);
+        if (temp->toString() == "#f" || temp->toString() == "false") {
             return std::make_shared<BooleanValue>(false);
         } else {
-            if (i == args.size() - 1) return env.eval(args[args.size() - 1]);
+            if (i == args.size() - 1)
+                return temp;
             else
-                env.eval(args[i]);
+                continue;
         }
     }   
 }
@@ -100,10 +102,11 @@ ValuePtr orForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
         return std::make_shared<BooleanValue>(false);
     }
     for (int i = 1; i < args.size(); i++) {
-        if (args[i]->toString() != "#f" && args[i]->toString() != "false") {
-            return env.eval(args[i]);
+        auto temp = env.eval(args[i]);
+        if (temp->toString() != "#f" && temp->toString() != "false") {
+            return temp;
         } else {
-            env.eval(args[i]);
+            continue;
         }
     }
     return std::make_shared<BooleanValue>(false);
