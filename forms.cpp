@@ -227,6 +227,7 @@ ValuePtr importForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
         throw LispError("unfound.");
     }
     std::string line_T;
+    std::deque<ValuePtr> parsers_import{};
     while (std::getline(get_in, line_T)) {
         try {
             if (line_T == "") continue;
@@ -236,8 +237,17 @@ ValuePtr importForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
                 Parser::unprocessed.clear();
                 auto tokens = Tokenizer::tokenize(line_T);
                 Parser parser(std::move(tokens));
-                auto value = parser.parse();
-                auto result = env.eval(std::move(value));
+                while (!parser.tokens.empty()) {
+                    auto value = parser.parse();
+                    Parser::uncomplete = 0;
+                    Parser::unprocessed.clear();
+                    parsers_import.push_back(std::move(value));
+                }
+                while (!parsers_import.empty()) {
+                    ValuePtr value = std::move(parsers_import.front());
+                    parsers_import.pop_front();
+                    auto result = env.eval(std::move(value));
+                }
                 Parser::uncomplete = 0;
             } else {
                 auto tokens = Tokenizer::tokenize(line_T);
@@ -247,8 +257,17 @@ ValuePtr importForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
                 }
                 Parser parser(std::move(Parser::unprocessed));
                 Parser::unprocessed.clear();
-                auto value = parser.parse();
-                auto result = env.eval(std::move(value));
+                while (!parser.tokens.empty()) {
+                    auto value = parser.parse();
+                    Parser::uncomplete = 0;
+                    Parser::unprocessed.clear();
+                    parsers_import.push_back(std::move(value));
+                }
+                while (!parsers_import.empty()) {
+                    ValuePtr value = std::move(parsers_import.front());
+                    parsers_import.pop_front();
+                    auto result = env.eval(std::move(value));
+                }
                 Parser::uncomplete = 0;
                 Parser::unprocessed.clear();
             }

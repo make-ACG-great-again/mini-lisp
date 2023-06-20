@@ -8,6 +8,7 @@
 #include "./builtins.h"
 #include "./value.h"
 #include "./error.h"
+#include "./parser.h"
 
 using SpecialFormType = ValuePtr(const std::vector<ValuePtr>&, EvalEnv&);
 extern const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;
@@ -600,6 +601,82 @@ ValuePtr my_reduce(const std::vector<ValuePtr>& params){
         return tempptr->apply(temp);
     } else {
         throw LispError("wrong type of proc.");
+    }
+};
+
+//lv7+
+std::deque<ValuePtr> parsers_read;
+ValuePtr read(const std::vector<ValuePtr>& params){
+    if (params.size() != 0) throw LispError("wrong num of arguments.");
+    Parser::uncomplete = 0;
+    if (!parsers_read.empty()) {
+        auto temp = std::move(parsers_read.front());
+        parsers_read.pop_front();
+        return temp;
+    }
+    while (true) {
+        try {
+            if (!Parser::uncomplete) {
+                Parser::unprocessed.clear();
+                std::cout << "read begin -> ";
+                std::string line;
+                std::getline(std::cin, line);
+                if (std::cin.eof()) {
+                    std::exit(0);
+                }
+                auto tokens = Tokenizer::tokenize(line);
+                Parser parser(std::move(tokens));
+                while (!parser.tokens.empty()) {
+                    auto value = parser.parse();
+                    Parser::uncomplete = 0;
+                    Parser::unprocessed.clear();
+                    parsers_read.push_back(std::move(value));
+                }
+                Parser::uncomplete = 0;
+                if (!parsers_read.empty()) {
+                    auto temp = std::move(parsers_read.front());
+                    parsers_read.pop_front();
+                    return temp;
+                } else
+                    throw SyntaxError("read process collapse");
+            } else {
+                std::cout << "read continue -> ";
+                std::string line;
+                std::getline(std::cin, line);
+                if (std::cin.eof()) {
+                    std::exit(0);
+                }
+                auto tokens = Tokenizer::tokenize(line);
+                while (!tokens.empty()) {
+                    Parser::unprocessed.push_back(std::move(tokens.front()));
+                    tokens.pop_front();
+                }
+                Parser parser(std::move(Parser::unprocessed));
+                Parser::unprocessed.clear();
+                while (!parser.tokens.empty()) {
+                    auto value = parser.parse();
+                    Parser::uncomplete = 0;
+                    Parser::unprocessed.clear();
+                    parsers_read.push_back(std::move(value));
+                }
+                Parser::uncomplete = 0;
+                Parser::unprocessed.clear();
+                if (!parsers_read.empty()) {
+                    auto temp = std::move(parsers_read.front());
+                    parsers_read.pop_front();
+                    return temp;
+                } else
+                    throw SyntaxError("read process collapse");
+            }
+        } catch (uncomplete_error& c) {
+            Parser::uncomplete = 1;
+        } catch (std::runtime_error& e) {
+            std::cerr << "error: " << e.what() << std::endl;
+            Parser::uncomplete = 0;
+            Parser::unprocessed.clear();
+            std::cin.clear();
+            throw SyntaxError("unreadable");
+        }
     }
 };
 

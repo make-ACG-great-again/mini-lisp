@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
 
 #include "./tokenizer.h"
 #include "./parser.h"
@@ -33,6 +34,7 @@ void REPL() {
     // [...]
     auto env = EvalEnv::createGlobal();  // 求值
     Parser::uncomplete = 0;
+    std::deque<ValuePtr> parsers_REPL{};
     while (true) {
         try {
             if (!Parser::uncomplete) {
@@ -53,6 +55,13 @@ void REPL() {
                     // std::cout << value->toString() << std::endl;  //
                     // 输出外部表示
                     // //语法分析
+                    Parser::uncomplete = 0;
+                    Parser::unprocessed.clear();
+                    parsers_REPL.push_back(std::move(value));
+                }
+                while (!parsers_REPL.empty()) {
+                    ValuePtr value = std::move(parsers_REPL.front());
+                    parsers_REPL.pop_front();
                     auto result = env->eval(std::move(value));  // 求值
                     // if (result == nullptr) std::cout << "error" << std::endl;
                     std::cout << result->toString() << std::endl;  // 求值
@@ -75,6 +84,13 @@ void REPL() {
                 Parser::unprocessed.clear();
                 while (!parser.tokens.empty()) {
                     auto value = parser.parse();
+                    Parser::uncomplete = 0;
+                    Parser::unprocessed.clear();
+                    parsers_REPL.push_back(std::move(value));
+                }
+                while (!parsers_REPL.empty()) {
+                    ValuePtr value = std::move(parsers_REPL.front());
+                    parsers_REPL.pop_front();
                     auto result = env->eval(std::move(value));
                     std::cout << result->toString() << std::endl;
                 }
@@ -99,6 +115,7 @@ int text(std::ifstream& get_in) {
     auto env = EvalEnv::createGlobal();
     std::string line;
     Parser::uncomplete = 0;
+    std::deque<ValuePtr> parsers_text{};
     while (std::getline(get_in, line)) {
         try {
             if (line == "") continue;
@@ -109,6 +126,13 @@ int text(std::ifstream& get_in) {
                 Parser parser(std::move(tokens));
                 while (!parser.tokens.empty()) {
                     auto value = parser.parse();
+                    Parser::uncomplete = 0;
+                    Parser::unprocessed.clear();
+                    parsers_text.push_back(std::move(value));
+                }
+                while (!parsers_text.empty()) {
+                    ValuePtr value = std::move(parsers_text.front());
+                    parsers_text.pop_front();
                     auto result = env->eval(std::move(value));
                 }
                 Parser::uncomplete = 0;
@@ -122,6 +146,13 @@ int text(std::ifstream& get_in) {
                 Parser::unprocessed.clear();
                 while (!parser.tokens.empty()) {
                     auto value = parser.parse();
+                    Parser::uncomplete = 0;
+                    Parser::unprocessed.clear();
+                    parsers_text.push_back(std::move(value));
+                }
+                while (!parsers_text.empty()) {
+                    ValuePtr value = std::move(parsers_text.front());
+                    parsers_text.pop_front();
                     auto result = env->eval(std::move(value));
                 }
                 Parser::uncomplete = 0;

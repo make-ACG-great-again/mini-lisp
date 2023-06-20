@@ -3,6 +3,7 @@
 
 #include<unordered_map>
 #include<vector>
+#include<deque>
 #include "./value.h"
 
 using ValuePtr = std::shared_ptr<Value>;
@@ -60,6 +61,8 @@ ValuePtr my_append(const std::vector<ValuePtr>& params);
 ValuePtr my_map(const std::vector<ValuePtr>& params);
 ValuePtr my_filter(const std::vector<ValuePtr>& params);
 ValuePtr my_reduce(const std::vector<ValuePtr>& params);
+// lv7+
+ValuePtr read(const std::vector<ValuePtr>& params);
 
 class builtin {
 public:
@@ -212,6 +215,10 @@ public:
         std::string reduce = "reduce";
         load_list[reduce] = &my_reduce;
         loadReference.push_back(reduce);
+        // lv7+
+        std::string read_s = "read";
+        load_list[read_s] = &read;
+        loadReference.push_back(read_s);
         return loadReference;
     }
 };
